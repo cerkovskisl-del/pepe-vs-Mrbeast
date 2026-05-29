@@ -21,31 +21,55 @@
             <div class="stat-box target">
                 <h2>MrBeast Sekotāji</h2>
                 <p id="beast-count">491,000,000</p>
+                <p class="sub-text">Aug par: 2/sek</p>
             </div>
         </div>
 
         <div class="click-zone">
-            <button id="click-btn">📈 Klikšķini, lai iegūtu sekotājus!</button>
+            <img src="https://gweb-cst.web.app/pepe.png" id="pepe-img" alt="Pepe" title="Klikšķini uz manis!">
+        </div>
+
+        <div class="control-buttons">
+            <button onclick="saveGame()" class="ctrl-btn">💾 Saglabāt</button>
+            <button onclick="resetGame()" class="ctrl-btn reset">🔄 Dzēst progresu</button>
         </div>
 
         <h2>Veikals (Upgrades)</h2>
         <div class="shop">
             <div class="upgrade-card">
                 <h3>Izveidot mēmi</h3>
-                <p>Dod: +1 sekotāju sekundē</p>
+                <p>Dod: +1 sek/sekundē</p>
                 <button id="upgrade1-btn" onclick="buyUpgrade(1)">Cena: 15 sekotāji</button>
             </div>
             
             <div class="upgrade-card">
-                <h3>Vírusu video</h3>
-                <p>Dod: +10 sekotājus sekundē</p>
+                <h3>Vīrusu video</h3>
+                <p>Dod: +10 sek/sekundē</p>
                 <button id="upgrade2-btn" onclick="buyUpgrade(2)">Cena: 100 sekotāji</button>
             </div>
 
             <div class="upgrade-card">
                 <h3>Kopīgs strīms</h3>
-                <p>Dod: +100 sekotājus sekundē</p>
-                <button id="upgrade3-btn" onclick="buyUpgrade(3)">Cena: 1100 sekotāji</button>
+                <p>Dod: +100 sek/sekundē</p>
+                <button id="upgrade3-btn" onclick="buyUpgrade(3)">Cena: 1,100 sekotāji</button>
+            </div>
+
+            <div class="upgrade-card">
+                <h3>Pepe Kriptovalūta</h3>
+                <p>Dod: +1,000 sek/sekundē</p>
+                <button id="upgrade4-btn" onclick="buyUpgrade(4)">Cena: 12,000 sekotāji</button>
+            </div>
+
+            <div class="upgrade-card">
+                <h3>Pasaules tūre</h3>
+                <p>Dod: +10,000 sek/sekundē</p>
+                <button id="upgrade5-btn" onclick="buyUpgrade(5)">Cena: 130,000 sekotāji</button>
+            </div>
+
+            <div class="upgrade-card">
+                <h3>Nopirkt Twitter (X)</h3>
+                <p>Dod: +100,000 sek/sekundē</p>
+                <button id="upgrade6-btn" onclick="buyUpgrade(6)">Cena: 1,500,000 sekotāji</button>
             </div>
         </div>
     </div>
