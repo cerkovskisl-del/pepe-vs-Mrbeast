@@ -22,7 +22,7 @@
             <div class="stat-box target">
                 <h2>MrBeast Followers</h2>
                 <p id="beast-count">491,000,000</p>
-                <p class="sub-text">Gaining: 2/sec</p>
+                <p class="sub-text">Gaining: <span id="beast-growth-rate">2</span>/sec</p>
             </div>
         </div>
 
@@ -32,12 +32,54 @@
 
         <div class="control-buttons">
             <button onclick="saveGame()" class="ctrl-btn">💾 Save Game</button>
+            <button id="rebirth-btn" onclick="triggerRebirth()" class="ctrl-btn rebirth-btn">✨ Rebirth (Requires 100k Followers)</button>
             <button onclick="resetGame()" class="ctrl-btn reset">🔄 Reset Progress</button>
         </div>
 
-        <h2>Shop & Upgrades</h2>
+        <h2 class="section-title">🐸 Pepe's Skill Tree 🐸</h2>
+        <p class="sp-display">Available Skill Points: <span id="sp-count">0</span></p>
+        
+        <div class="skill-tree">
+            <div class="skill-branch blue-branch">
+                <h3>⚡ Click Mastery</h3>
+                <div class="skill-node">
+                    <button id="skill-blue1" onclick="buySkill('blue1')">Double Click (Cost: 1 SP)</button>
+                    <p class="skill-desc">Clicks give x2 more followers</p>
+                </div>
+                <div class="skill-node">
+                    <button id="skill-blue2" onclick="buySkill('blue2')" class="locked">Critical Clicks (Cost: 2 SP)</button>
+                    <p class="skill-desc">5% chance to get x10 followers per click</p>
+                </div>
+            </div>
+
+            <div class="skill-branch green-branch">
+                <h3>🌱 Passive Growth</h3>
+                <div class="skill-node">
+                    <button id="skill-green1" onclick="buySkill('green1')">Meme Synergy (Cost: 1 SP)</button>
+                    <p class="skill-desc">All shop items cost 15% less</p>
+                </div>
+                <div class="skill-node">
+                    <button id="skill-green2" onclick="buySkill('green2')" class="locked">Meme Empire (Cost: 2 SP)</button>
+                    <p class="skill-desc">Boosts your total FPS by +25%</p>
+                </div>
+            </div>
+
+            <div class="skill-branch red-branch">
+                <h3>🔥 Sabotage Beast</h3>
+                <div class="skill-node">
+                    <button id="skill-red1" onclick="buySkill('red1')">Copyright Strike (Cost: 1 SP)</button>
+                    <p class="skill-desc">Reduces MrBeast's growth by 50%</p>
+                </div>
+                <div class="skill-node">
+                    <button id="skill-red2" onclick="buySkill('red2')" class="locked">Cancel Culture (Cost: 2 SP)</button>
+                    <p class="skill-desc">Instantly removes 10M from MrBeast</p>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="section-title">Shop & Upgrades</h2>
         <div class="shop">
-            <div class="upgrade-card" style="background: #473346;">
+            <div class="upgrade-card style-click">
                 <h3>💪 Stronger Clicks</h3>
                 <p>Gives: +1 per Click</p>
                 <button id="upgrade0-btn" onclick="buyClickUpgrade()">Cost: 50 followers</button>
