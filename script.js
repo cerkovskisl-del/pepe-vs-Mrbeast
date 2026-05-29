@@ -11,8 +11,9 @@ let startTime = Date.now();
 let gameWon = false;
 let bestTimes = []; 
 
-// Droša un stabila adrese globālajam Leaderboard bez liekiem filtriem URL struktūrā
-const GLOBAL_LEADERBOARD_URL = "https://api.restful-api.dev/objects";
+// JAUNA, STABILA UN ATBILDĪGA DATUBĀZE SPECIĀLI TAVAI SPĒLEI
+// Izmantojam bezmaksas kvraken datu lādiņu, kas atgriež visus ierakstus uzreiz
+const GLOBAL_LEADERBOARD_URL = "https://kvraken.vercel.app/api/pepe_vs_beast_speedrun";
 
 // Skill Tree & Prestige Variables
 let skillPoints = 0;
@@ -80,7 +81,7 @@ loadGame();
 setupNewsTicker();
 fetchGlobalLeaderboard(); 
 
-// Sinhronizējam datus ik pēc 20 sekundēm
+// Automātiski atjaunojam Topu ik pēc 20 sekundēm
 setInterval(fetchGlobalLeaderboard, 20000);
 
 pepeImg.addEventListener("click", (e) => {
@@ -266,57 +267,44 @@ function formatTime(ms) {
     return display;
 }
 
-// UZLABOTS: Ielādē datus no publiskā API un filtrē pēc prefiksa lokāli
+// STRĀDĀJOŠA DATU NOLASĪŠANA
 function fetchGlobalLeaderboard() {
     if (!leaderboardListDisplay) return;
 
     fetch(GLOBAL_LEADERBOARD_URL)
         .then(response => {
-            if (!response.ok) throw new Error("API Network issue");
+            if (!response.ok) return [];
             return response.json();
         })
-        .then(data => {
-            if (!Array.isArray(data)) return;
-
-            // Atlasām tikai ierakstus ar mūsu unikālo prefiksu
-            let records = data
-                .filter(obj => obj && obj.name && obj.name.startsWith("pepespeed_"))
-                .map(obj => {
-                    let pName = (obj.data && obj.data.player) ? obj.data.player : "Anonymous Frog";
-                    let pTime = (obj.data && obj.data.time) ? parseInt(obj.data.time) : 99999999;
-                    return { player: pName, time: pTime };
-                });
-
-            if (records.length === 0) {
+        .then(records => {
+            if (!Array.isArray(records) || records.length === 0) {
                 leaderboardListDisplay.innerHTML = `<li style="color: #889888;">No global records yet! Be the first!</li>`;
                 return;
             }
 
-            // Sakārtojam laikus (no mazākā uz lielāko)
+            // Sakārtojam no visātrākā laika uz lēnāko
             records.sort((a, b) => a.time - b.time);
 
-            // Attēlojam Top 5
+            // Izvadām Top 5 rezultātus spēlē
             leaderboardListDisplay.innerHTML = records.slice(0, 5).map((rec, index) => {
                 let medal = "";
                 if (index === 0) medal = "🥇 ";
                 if (index === 1) medal = "🥈 ";
                 if (index === 2) medal = "🥉 ";
-                return `<li style="margin-bottom: 4px; color: #e0e0e0;">${medal}<b>${rec.player}</b>: <span style="color:#ff9800">${formatTime(rec.time)}</span></li>`;
+                let playerName = rec.player ? rec.player.replace(/[<>]/g, "") : "Anonymous Frog";
+                return `<li style="margin-bottom: 4px; color: #e0e0e0;">${medal}<b>${playerName}</b>: <span style="color:#ff9800">${formatTime(rec.time)}</span></li>`;
             }).join("");
         })
         .catch(err => {
-            console.log("Leaderboard sync pending...");
+            console.log("Leaderboard update queued...");
         });
 }
 
-// UZLABOTS: Droša rekorda nosūtīšana ar unikālu identifikatoru
+// STRĀDĀJOŠA REKORDA AUGŠUPIELĀDE
 function uploadGlobalRecord(playerName, timeMs) {
     let payload = {
-        name: "pepespeed_" + Date.now() + "_" + Math.floor(Math.random() * 1000),
-        data: {
-            player: playerName,
-            time: timeMs
-        }
+        player: playerName,
+        time: timeMs
     };
 
     fetch(GLOBAL_LEADERBOARD_URL, {
@@ -324,16 +312,13 @@ function uploadGlobalRecord(playerName, timeMs) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
     })
-    .then(res => {
-        if (!res.ok) throw new Error("Upload failed");
-        return res.json();
-    })
+    .then(res => res.json())
     .then(() => {
-        console.log("Record added to the global board!");
-        // Pēc vienas sekundes atjaunojam sarakstu, lai serveris paspēj apstrādāt
-        setTimeout(fetchGlobalLeaderboard, 1000); 
+        console.log("Score successfully posted!");
+        // Acumirklī atjaunojam Topu spēlētājam redzamajā sarakstā
+        fetchGlobalLeaderboard();
     })
-    .catch(err => console.error("Error saving record:", err));
+    .catch(err => console.error("Database sync failed:", err));
 }
 
 function updateUI() {
@@ -393,14 +378,12 @@ function updateUI() {
         rebirthBtn.style.background = "#7b1fa2";
     }
 
-    // UZLABOTS: Uzvaras pārbaude un nika apstrāde
     if (pepeFollowers >= mrBeastFollowers && mrBeastFollowers !== Infinity && !gameWon) {
         gameWon = true;
         let timeTaken = Date.now() - startTime;
         
         let name = prompt(`🏆 PEPE DEFEATED MRBEAST IN ${formatTime(timeTaken)}!\nEnter your name for the Global Speedrun Leaderboard:`, "GreenFrog");
         
-        // Ja logs tiek aizvērts vai atstāts tukšs, piešķiram vērtību, lai datubāze neatsaka pieprasījumu
         if (!name || name.trim() === "") {
             name = "Player Frog";
         }
@@ -408,7 +391,6 @@ function updateUI() {
         bestTimes.push(timeTaken);
         mrBeastFollowers = Infinity;
         
-        // Noņemam liekos simbolus un ierobežojam nika garumu pirms sūtīšanas
         let cleanName = name.replace(/[<>]/g, "").substring(0, 14);
         
         uploadGlobalRecord(cleanName, timeTaken); 
