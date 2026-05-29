@@ -406,3 +406,84 @@ h1 {
         transform: translate(-50%, -180px) scale(0.9);
     }
 }
+/* RESPONSIVE DESIGN FOR PHONES */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+        height: auto;
+        min-height: 100vh;
+        justify-content: flex-start;
+    }
+
+    .news-container {
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .game-container {
+        flex-direction: column; /* Uz telefona novieto paneļus vienu zem otra */
+        width: 100%;
+        height: auto;
+        max-height: none;
+        overflow-y: visible;
+    }
+
+    .main-panel {
+        border-right: none;
+        border-bottom: 1px solid #2d3829; /* Atdalošā svītra tagad būs apakšā */
+        padding: 15px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    h1 {
+        font-size: 20px;
+        text-align: center;
+    }
+
+    .scoreboard {
+        flex-direction: row; /* Saglabā abu personu statistiku blakus */
+        gap: 8px;
+    }
+
+    .stat-box {
+        padding: 8px;
+    }
+
+    .stat-box h2 {
+        font-size: 11px;
+    }
+
+    .stat-box p {
+        font-size: 18px;
+    }
+
+    #pepe-img {
+        width: 200px; /* Nedaudz samazinām uz telefona, lai smuki ietilpst */
+        margin: 20px 0;
+    }
+
+    .menu-panel {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .tab-content {
+        overflow-y: visible; /* Ļauj lapai ritināties uz leju dabīgi */
+        max-height: none;
+    }
+    
+    .upgrade-item {
+        padding: 10px;
+    }
+    
+    .upgrade-info h3 {
+        font-size: 13px;
+    }
+    
+    .upgrade-item button {
+        min-width: 90px;
+        font-size: 12px;
+        padding: 8px 10px;
+    }
+}
