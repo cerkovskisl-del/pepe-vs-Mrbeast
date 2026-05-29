@@ -11,9 +11,10 @@ let startTime = Date.now();
 let gameWon = false;
 let bestTimes = []; 
 
-// JAUNA, STABILA UN ATBILDĪGA DATUBĀZE SPECIĀLI TAVAI SPĒLEI
-// Izmantojam bezmaksas kvraken datu lādiņu, kas atgriež visus ierakstus uzreiz
-const GLOBAL_LEADERBOARD_URL = "https://kvraken.vercel.app/api/pepe_vs_beast_speedrun";
+// JAUNĀ INTEGRĒTĀ DATUBĀZE NO JSONBIN.IO (Piesaistīta tavam kontam)
+const MY_JSONBIN_ID = "6a19a4addf5aa59f774bd51"; 
+const MY_MASTER_KEY = "$2a$10$0ZvsqJCjo3aEzPmSK.3SCOZEuTlaJkHIP3NyPQiyLaheO.yjaF712"; 
+const GLOBAL_LEADERBOARD_URL = `https://api.jsonbin.io/v3/b/${MY_JSONBIN_ID}`;
 
 // Skill Tree & Prestige Variables
 let skillPoints = 0;
@@ -267,55 +268,77 @@ function formatTime(ms) {
     return display;
 }
 
-// STRĀDĀJOŠA DATU NOLASĪŠANA
+// DROŠA UN STRĀDĀJOŠA DATU NOLASĪŠANA (JSONBin)
 function fetchGlobalLeaderboard() {
     if (!leaderboardListDisplay) return;
 
-    fetch(GLOBAL_LEADERBOARD_URL)
-        .then(response => {
-            if (!response.ok) return [];
-            return response.json();
-        })
-        .then(records => {
-            if (!Array.isArray(records) || records.length === 0) {
-                leaderboardListDisplay.innerHTML = `<li style="color: #889888;">No global records yet! Be the first!</li>`;
-                return;
-            }
+    fetch(`${GLOBAL_LEADERBOARD_URL}?meta=false`, {
+        method: "GET",
+        headers: {
+            "X-Master-Key": MY_MASTER_KEY
+        }
+    })
+    .then(response => {
+        if (!response.ok) throw new Error();
+        return response.json();
+    })
+    .then(records => {
+        if (!Array.isArray(records) || records.length === 0) {
+            leaderboardListDisplay.innerHTML = `<li style="color: #889888;">No global records yet! Be the first!</li>`;
+            return;
+        }
 
-            // Sakārtojam no visātrākā laika uz lēnāko
-            records.sort((a, b) => a.time - b.time);
+        // Sakārtojam no visātrākā laika uz lēnāko
+        records.sort((a, b) => a.time - b.time);
 
-            // Izvadām Top 5 rezultātus spēlē
-            leaderboardListDisplay.innerHTML = records.slice(0, 5).map((rec, index) => {
-                let medal = "";
-                if (index === 0) medal = "🥇 ";
-                if (index === 1) medal = "🥈 ";
-                if (index === 2) medal = "🥉 ";
-                let playerName = rec.player ? rec.player.replace(/[<>]/g, "") : "Anonymous Frog";
-                return `<li style="margin-bottom: 4px; color: #e0e0e0;">${medal}<b>${playerName}</b>: <span style="color:#ff9800">${formatTime(rec.time)}</span></li>`;
-            }).join("");
-        })
-        .catch(err => {
-            console.log("Leaderboard update queued...");
-        });
+        // Izvadām Top 5 rezultātus spēlē
+        leaderboardListDisplay.innerHTML = records.slice(0, 5).map((rec, index) => {
+            let medal = "";
+            if (index === 0) medal = "🥇 ";
+            if (index === 1) medal = "🥈 ";
+            if (index === 2) medal = "🥉 ";
+            let playerName = rec.player ? rec.player.replace(/[<>]/g, "") : "Anonymous Frog";
+            return `<li style="margin-bottom: 4px; color: #e0e0e0;">${medal}<b>${playerName}</b>: <span style="color:#ff9800">${formatTime(rec.time)}</span></li>`;
+        }).join("");
+    })
+    .catch(err => {
+        console.log("Leaderboard update queued...");
+    });
 }
 
-// STRĀDĀJOŠA REKORDA AUGŠUPIELĀDE
+// JAUNĀ UN STRĀDĀJOŠA REKORDA AUGŠUPIELĀDE (JSONBin)
 function uploadGlobalRecord(playerName, timeMs) {
-    let payload = {
-        player: playerName,
-        time: timeMs
-    };
+    // 1. Vispirms lejupielādējam esošos datus
+    fetch(`${GLOBAL_LEADERBOARD_URL}?meta=false`, {
+        method: "GET",
+        headers: {
+            "X-Master-Key": MY_MASTER_KEY
+        }
+    })
+    .then(res => res.json())
+    .then(currentRecords => {
+        let records = Array.isArray(currentRecords) ? currentRecords : [];
+        
+        // 2. Pievienojam jauno ierakstu masīvā
+        records.push({
+            player: playerName,
+            time: timeMs
+        });
 
-    fetch(GLOBAL_LEADERBOARD_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        // 3. Saglabājam visu atjaunoto sarakstu ar PUT metodi
+        return fetch(GLOBAL_LEADERBOARD_URL, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "X-Master-Key": MY_MASTER_KEY
+            },
+            body: JSON.stringify(records)
+        });
     })
     .then(res => res.json())
     .then(() => {
-        console.log("Score successfully posted!");
-        // Acumirklī atjaunojam Topu spēlētājam redzamajā sarakstā
+        console.log("Score successfully posted to JSONBin!");
+        // Uzreiz pārlādējam vizuālo Topu
         fetchGlobalLeaderboard();
     })
     .catch(err => console.error("Database sync failed:", err));
