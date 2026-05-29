@@ -41,16 +41,16 @@ const clickZone = document.getElementById("click-zone");
 
 let sabotageCooldown = false;
 
-// Ticker News List
+// Ticker News List (English Only)
 const newsDatabase = [
-    "MrBeast paziņo par jaunu video. Pepe šobrīd ēd čipsus un domā, kā viņu apdzīt.",
-    "Finanšu eksperti ir šokā: Pepe Coin vērtība tuvojas kosmosam!",
-    "Baumas: Pepe plāno iegādāties YouTube un pārdēvēt to par PepeTube.",
-    "MrBeast esot redzēts mēģinām izdomāt mēmi, bet viņam nesanāca tik labi kā Pepe.",
-    "BREAKING: Īstie sekotāji sāk saprast, ka zaļās vardes ir foršākas par bezmaksas mašīnām.",
-    "Zinātnieki pierāda: klikšķināšana uz Pepe uzlabo garastāvokli par 420%.",
-    "MrBeast pazaudēja savas zeķes. Pepe tikmēr turpina krāt sekotājus.",
-    "Sociālie tīkli vārās! Pepe tikko publicēja bildi, kas savāca miljonu skatījumu 2 sekundēs."
+    "MrBeast announces a new massive video. Pepe is eating chips, quietly plotting his next big move.",
+    "Financial experts in absolute shock: Pepe Coin value is skyrocketing straight to the moon!",
+    "Unconfirmed rumors: Pepe is planning to purchase YouTube and rename it to PepeTube.",
+    "MrBeast was spotted trying to design a viral meme, but it wasn't nearly as good as Pepe's.",
+    "BREAKING: Millions of followers realize green frogs are way cooler than getting free cars.",
+    "Scientists prove: clicking on Pepe improves gaming performance and overall mood by 420%.",
+    "MrBeast lost his favorite socks. Meanwhile, Pepe keeps gaining thousands of followers.",
+    "Social media is boiling! Pepe posted a simple reaction picture that gained 1M views in 2 seconds."
 ];
 
 // Tabs Switching
@@ -72,7 +72,7 @@ function switchTab(tabId) {
 loadGame();
 setupNewsTicker();
 
-// Clicking Logic ar Vizuālo Efektu (Floating Text)
+// Clicking Logic with Floating Text
 pepeImg.addEventListener("click", (e) => {
     let gained = clickPower;
     let isCrit = false;
@@ -81,36 +81,32 @@ pepeImg.addEventListener("click", (e) => {
     if (skills.blue2.purchased) {
         if (Math.random() < 0.05) {
             gained *= 10;
-            isCrit = true; // Kritiskais klikšķis!
+            isCrit = true;
         }
     }
     pepeFollowers += gained;
     
-    // Izsaucam peldošā teksta funkciju, padodot peles koordinātas
     createFloatingText(e.clientX, e.clientY, gained, isCrit);
-
     updateUI();
 });
 
-// Peldošā teksta izveide
+// Floating Text Function
 function createFloatingText(x, y, amount, isCrit) {
     const textNode = document.createElement("div");
     textNode.innerText = `+${amount.toLocaleString()}${isCrit ? " CRIT! 🔥" : ""}`;
     textNode.className = isCrit ? "floating-text crit-text" : "floating-text";
     
-    // Novietojam elementu tieši tur, kur lietotājs uzklikšķināja
     textNode.style.left = `${x}px`;
     textNode.style.top = `${y}px`;
     
     document.body.appendChild(textNode);
     
-    // Pēc 1 sekundes izdzēšam elementu no koda, lai nepārslogotu pārlūku
     setTimeout(() => {
         textNode.remove();
     }, 1000);
 }
 
-// Ziņu lentes uzstādīšana un rotācija
+// News Ticker setup
 function setupNewsTicker() {
     const newsText = document.getElementById("news-text");
     setInterval(() => {
@@ -118,7 +114,7 @@ function setupNewsTicker() {
             const randomIndex = Math.floor(Math.random() * newsDatabase.length);
             newsText.innerText = newsDatabase[randomIndex];
         }
-    }, 15000); // Maina ziņu ik pēc 15 sekundēm
+    }, 15000);
 }
 
 // Click Upgrade
@@ -221,7 +217,7 @@ function triggerSabotage() {
     if (mrBeastFollowers !== Infinity) {
         mrBeastFollowers = Math.max(0, mrBeastFollowers - 50000);
         const newsText = document.getElementById("news-text");
-        if (newsText) newsText.innerText = "🚨 BREAKING: Noslēpumainā kārtā MrBeast tikko zaudēja 50,000 sekotāju! Pepe izskatās nevainīgi...";
+        if (newsText) newsText.innerText = "🚨 BREAKING: Mysteriously, MrBeast just lost 50,000 followers! Pepe looks totally innocent...";
     }
     pepeFollowers += 25000;
 
