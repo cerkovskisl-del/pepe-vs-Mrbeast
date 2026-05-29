@@ -9,11 +9,10 @@ let mrBeastFollowers = 492000000;
 // Speedrun Timer Variables
 let startTime = Date.now();
 let gameWon = false;
-let bestTimes = []; // Šeit joprojām turēsim lokālos, drošībai
+let bestTimes = []; 
 
-// Globālā Leaderboard adrese (Publiska bezmaksas datubāze tavas spēles rekordiem)
-// Izmantojam unikālu atslēgu, lai dati nepazustu un nesajauktos ar citām spēlēm
-const GLOBAL_LEADERBOARD_URL = "https://api.restful-api.dev/objects?namespace=pepe_vs_beast_speedrun_v1";
+// Droša un stabila adrese globālajam Leaderboard bez liekiem filtriem URL struktūrā
+const GLOBAL_LEADERBOARD_URL = "https://api.restful-api.dev/objects";
 
 // Skill Tree & Prestige Variables
 let skillPoints = 0;
@@ -79,9 +78,9 @@ function switchTab(tabId) {
 
 loadGame();
 setupNewsTicker();
-fetchGlobalLeaderboard(); // Ielādējam kopējos pasaules rekordus uzreiz startā
+fetchGlobalLeaderboard(); 
 
-// Reizi 20 sekundēs automātiski atjaunojam Topu no interneta
+// Sinhronizējam datus ik pēc 20 sekundēm
 setInterval(fetchGlobalLeaderboard, 20000);
 
 pepeImg.addEventListener("click", (e) => {
@@ -267,30 +266,36 @@ function formatTime(ms) {
     return display;
 }
 
-// FUNKCIJA: IELĀDĒT REKORDUS NO INTERNETA DATUBĀZES (VISIEM KOPIE)
+// UZLABOTS: Ielādē datus no publiskā API un filtrē pēc prefiksa lokāli
 function fetchGlobalLeaderboard() {
     if (!leaderboardListDisplay) return;
 
-    fetch("https://api.restful-api.dev/objects")
-        .then(response => response.json())
+    fetch(GLOBAL_LEADERBOARD_URL)
+        .then(response => {
+            if (!response.ok) throw new Error("API Network issue");
+            return response.json();
+        })
         .then(data => {
-            // Atlasām tikai tās vērtības, kas pieder mūsu spēlei
+            if (!Array.isArray(data)) return;
+
+            // Atlasām tikai ierakstus ar mūsu unikālo prefiksu
             let records = data
-                .filter(obj => obj.name && obj.name.startsWith("pepe_run_"))
-                .map(obj => ({
-                    player: obj.data.player || "Anonymous Frog",
-                    time: parseInt(obj.data.time) || 99999999
-                }));
+                .filter(obj => obj && obj.name && obj.name.startsWith("pepespeed_"))
+                .map(obj => {
+                    let pName = (obj.data && obj.data.player) ? obj.data.player : "Anonymous Frog";
+                    let pTime = (obj.data && obj.data.time) ? parseInt(obj.data.time) : 99999999;
+                    return { player: pName, time: pTime };
+                });
 
             if (records.length === 0) {
                 leaderboardListDisplay.innerHTML = `<li style="color: #889888;">No global records yet! Be the first!</li>`;
                 return;
             }
 
-            // Sakārtojam no ātrākā laika uz lēnāko
+            // Sakārtojam laikus (no mazākā uz lielāko)
             records.sort((a, b) => a.time - b.time);
 
-            // Parādām Top 5 uz ekrāna
+            // Attēlojam Top 5
             leaderboardListDisplay.innerHTML = records.slice(0, 5).map((rec, index) => {
                 let medal = "";
                 if (index === 0) medal = "🥇 ";
@@ -300,29 +305,35 @@ function fetchGlobalLeaderboard() {
             }).join("");
         })
         .catch(err => {
-            console.log("Leaderboard error, loading backup...");
+            console.log("Leaderboard sync pending...");
         });
 }
 
-// FUNKCIJA: NOSŪTĪT JAUNO REKORDU UZ INTERNETU
+// UZLABOTS: Droša rekorda nosūtīšana ar unikālu identifikatoru
 function uploadGlobalRecord(playerName, timeMs) {
     let payload = {
-        name: "pepe_run_" + Date.now(),
+        name: "pepespeed_" + Date.now() + "_" + Math.floor(Math.random() * 1000),
         data: {
             player: playerName,
             time: timeMs
         }
     };
 
-    fetch("https://api.restful-api.dev/objects", {
+    fetch(GLOBAL_LEADERBOARD_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
     })
-    .then(res => res.json())
+    .then(res => {
+        if (!res.ok) throw new Error("Upload failed");
+        return res.json();
+    })
     .then(() => {
-        fetchGlobalLeaderboard(); // Uzreiz atjaunojam sarakstu
-    });
+        console.log("Record added to the global board!");
+        // Pēc vienas sekundes atjaunojam sarakstu, lai serveris paspēj apstrādāt
+        setTimeout(fetchGlobalLeaderboard, 1000); 
+    })
+    .catch(err => console.error("Error saving record:", err));
 }
 
 function updateUI() {
@@ -382,19 +393,25 @@ function updateUI() {
         rebirthBtn.style.background = "#7b1fa2";
     }
 
-    // PĀRBAUDE: UZVARA
+    // UZLABOTS: Uzvaras pārbaude un nika apstrāde
     if (pepeFollowers >= mrBeastFollowers && mrBeastFollowers !== Infinity && !gameWon) {
         gameWon = true;
         let timeTaken = Date.now() - startTime;
         
-        // Pajautājam spēlētāja vārdu priekš pasaules Topa
         let name = prompt(`🏆 PEPE DEFEATED MRBEAST IN ${formatTime(timeTaken)}!\nEnter your name for the Global Speedrun Leaderboard:`, "GreenFrog");
-        if (!name || name.trim() === "") name = "Anonymous Frog";
+        
+        // Ja logs tiek aizvērts vai atstāts tukšs, piešķiram vērtību, lai datubāze neatsaka pieprasījumu
+        if (!name || name.trim() === "") {
+            name = "Player Frog";
+        }
 
         bestTimes.push(timeTaken);
         mrBeastFollowers = Infinity;
         
-        uploadGlobalRecord(name.substring(0, 15), timeTaken); // Augšupielādējam uz internetu
+        // Noņemam liekos simbolus un ierobežojam nika garumu pirms sūtīšanas
+        let cleanName = name.replace(/[<>]/g, "").substring(0, 14);
+        
+        uploadGlobalRecord(cleanName, timeTaken); 
         saveGame();
     }
 }
@@ -455,7 +472,6 @@ function loadGame() {
     updateSkillTreeUI();
 }
 
-// UZLABOTA RESET FUNKCIJA (Nomet spēli, bet globālais tops netiek aiztikts!)
 function resetGame() {
     if (confirm("Reset your current followers and upgrades to start a new speedrun? (Your global leaderboard scores will stay!)")) {
         localStorage.removeItem("pepeClickerAdvancedSave");
@@ -467,7 +483,7 @@ function resetGame() {
         mrBeastFollowers = 492000000;
         skillPoints = 0;
         rebirthsCount = 0;
-        startTime = Date.now(); // Taimeris sākas no jauna jaunam mēģinājumam!
+        startTime = Date.now(); 
         gameWon = false;
         bestTimes = [];
 
