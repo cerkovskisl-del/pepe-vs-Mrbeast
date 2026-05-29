@@ -11,8 +11,8 @@ let startTime = Date.now();
 let gameWon = false;
 let bestTimes = []; 
 
-// TAVI PERSONĪGIE UN STABILIE DATUBĀZES ACCESSI NO JSONBIN
-const MY_JSONBIN_ID = "6a19a4addf5aa59f774bd51"; 
+// PILNĪBĀ PRECIZĒTI UN APSTIPRINĀTI DATUBĀZES PIEKĻUVES DATI
+const MY_JSONBIN_ID = "6a19a4eaddf5aa59f774bd51"; // Galīgais un precīzais 24 zīmju ID bez liekiem burtiem
 const MY_MASTER_KEY = "$2a$10$0ZvsqJCjo3aEzPmSK.3SCOZEuTlaJkHIP3NyPQiyLaheO.yjaF712"; 
 const GLOBAL_LEADERBOARD_URL = `https://api.jsonbin.io/v3/b/${MY_JSONBIN_ID}`;
 
@@ -82,7 +82,7 @@ loadGame();
 setupNewsTicker();
 fetchGlobalLeaderboard(); 
 
-// Automātiski sinhronizējam topu ik pēc 20 sekundēm
+// Automātiski atjaunojam Topu ik pēc 20 sekundēm
 setInterval(fetchGlobalLeaderboard, 20000);
 
 pepeImg.addEventListener("click", (e) => {
@@ -268,7 +268,7 @@ function formatTime(ms) {
     return display;
 }
 
-// DROŠA UN PAREIZA REKORDU NOLASĪŠANA AR "meta=false"
+// LIELISKA UN DROŠA REKORDU NOLASĪŠANA
 function fetchGlobalLeaderboard() {
     if (!leaderboardListDisplay) return;
 
@@ -279,18 +279,19 @@ function fetchGlobalLeaderboard() {
         }
     })
     .then(response => {
-        if (!response.ok) throw new Error("Database error");
+        if (!response.ok) throw new Error("Database offline");
         return response.json();
     })
     .then(records => {
-        // Pārliecināmies, ka dati vienmēr ir masīvs
+        // Pārliecināmies, ka dati vienmēr tiek uztverti kā masīvs
         let actualRecords = Array.isArray(records) ? records : [];
 
         if (actualRecords.length === 0) {
-            leaderboardListDisplay.innerHTML = `<li style="color: #889888; text-align: center; list-style: none; margin-top: 5px;">No records yet! Defeat MrBeast!</li>`;
+            leaderboardListDisplay.innerHTML = `<li style="color: #889888; text-align: center; list-style: none;">No records yet! Defeat MrBeast!</li>`;
             return;
         }
 
+        // Sakārtojam pēc labākā (mazākā) laika
         actualRecords.sort((a, b) => a.time - b.time);
 
         leaderboardListDisplay.innerHTML = actualRecords.slice(0, 5).map((rec, index) => {
@@ -299,15 +300,15 @@ function fetchGlobalLeaderboard() {
             if (index === 1) medal = "🥈 ";
             if (index === 2) medal = "🥉 ";
             let playerName = rec.player ? rec.player.replace(/[<>]/g, "") : "Anonymous Frog";
-            return `<li style="margin-bottom: 4px; color: #e0e0e0; font-size: 13px;">${medal}<b>${playerName}</b>: <span style="color:#ff9800">${formatTime(rec.time)}</span></li>`;
+            return `<li style="margin-bottom: 5px; color: #e0e0e0; list-style: none; font-size: 13px;">${medal}<b>${playerName}</b>: <span style="color:#ff9800">${formatTime(rec.time)}</span></li>`;
         }).join("");
     })
     .catch(err => {
-        console.log("Leaderboard syncing...");
+        console.log("Leaderboard sync pending... Check ID settings.");
     });
 }
 
-// DROŠA REKORDU SAGLABĀŠANA
+// SKAISTA UN DROŠA JAUNU REKORDU PIEVIENOŠANA TAVAM MASĪVAM
 function uploadGlobalRecord(playerName, timeMs) {
     fetch(`${GLOBAL_LEADERBOARD_URL}?meta=false`, {
         method: "GET",
@@ -316,7 +317,7 @@ function uploadGlobalRecord(playerName, timeMs) {
         }
     })
     .then(res => {
-        if(!res.ok) return [];
+        if (!res.ok) return [];
         return res.json();
     })
     .then(records => {
@@ -338,10 +339,10 @@ function uploadGlobalRecord(playerName, timeMs) {
     })
     .then(res => res.json())
     .then(() => {
-        console.log("Score posted successfully!");
+        console.log("Score successfully posted!");
         fetchGlobalLeaderboard();
     })
-    .catch(err => console.error("Database sync issue:", err));
+    .catch(err => console.error("Database sync failed:", err));
 }
 
 function updateUI() {
@@ -381,23 +382,23 @@ function updateUI() {
     followersPerSecond = calculatedFPS;
 
     let clickBtn = document.getElementById("upgrade0-btn");
-    if(clickBtn) clickBtn.innerText = `${getModifiedCost(clickUpgradeCost).toLocaleString()}`;
+    if (clickBtn) clickBtn.innerText = `${getModifiedCost(clickUpgradeCost).toLocaleString()}`;
     
     for (let id in upgrades) {
         let btn = document.getElementById(`upgrade${id}-btn`);
         if (btn) btn.innerText = `${getModifiedCost(upgrades[id].cost).toLocaleString()}`;
     }
 
-    if(pepeCountDisplay) pepeCountDisplay.innerText = Math.floor(pepeFollowers).toLocaleString();
-    if(beastCountDisplay) beastCountDisplay.innerText = Math.floor(mrBeastFollowers).toLocaleString();
-    if(fpsCountDisplay) fpsCountDisplay.innerText = followersPerSecond.toLocaleString();
-    if(clickPowerDisplay) clickPowerDisplay.innerText = clickPower.toLocaleString();
-    if(spCountDisplay) spCountDisplay.innerText = skillPoints;
+    if (pepeCountDisplay) pepeCountDisplay.innerText = Math.floor(pepeFollowers).toLocaleString();
+    if (beastCountDisplay) beastCountDisplay.innerText = Math.floor(mrBeastFollowers).toLocaleString();
+    if (fpsCountDisplay) fpsCountDisplay.innerText = followersPerSecond.toLocaleString();
+    if (clickPowerDisplay) clickPowerDisplay.innerText = clickPower.toLocaleString();
+    if (spCountDisplay) spCountDisplay.innerText = skillPoints;
 
     let beastSpeed = skills.red1.purchased ? 1 : 2;
-    if(beastGrowthRateDisplay) beastGrowthRateDisplay.innerText = beastSpeed;
+    if (beastGrowthRateDisplay) beastGrowthRateDisplay.innerText = beastSpeed;
 
-    if(rebirthBtn) {
+    if (rebirthBtn) {
         if (pepeFollowers >= 100000) {
             rebirthBtn.style.background = "#e91e63";
         } else {
@@ -509,7 +510,7 @@ function resetGame() {
     }
 }
 
-// Spēles galvenais cikls
+// Spēles galvenais darbības cikls (10 reizes sekundē)
 setInterval(() => {
     if (followersPerSecond > 0) pepeFollowers += (followersPerSecond / 10);
     if (mrBeastFollowers !== Infinity) mrBeastFollowers += (skills.red1.purchased ? 0.01 : 0.02);
