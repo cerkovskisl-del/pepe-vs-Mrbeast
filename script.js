@@ -11,11 +11,6 @@ let startTime = Date.now();
 let gameWon = false;
 let bestTimes = []; 
 
-// PILNĪBĀ PRECIZĒTI UN APSTIPRINĀTI DATUBĀZES PIEKĻUVES DATI
-const MY_JSONBIN_ID = "6a19a4eaddf5aa59f774bd51"; 
-const MY_MASTER_KEY = "$2a$10$0ZvsqJCjo3aEzPmSK.3SCOZEuTlaJkHIP3NyPQiyLaheO.yjaF712"; 
-const GLOBAL_LEADERBOARD_URL = `https://api.jsonbin.io/v3/b/${MY_JSONBIN_ID}`;
-
 // Skill Tree & Prestige Variables
 let skillPoints = 0;
 let rebirthsCount = 0;
@@ -48,7 +43,6 @@ const beastGrowthRateDisplay = document.getElementById("beast-growth-rate");
 const rebirthBtn = document.getElementById("rebirth-btn");
 const pepeImg = document.getElementById("pepe-img");
 const currentTimerDisplay = document.getElementById("current-timer");
-const leaderboardListDisplay = document.getElementById("leaderboard-list");
 
 let sabotageCooldown = false;
 
@@ -80,10 +74,6 @@ function switchTab(tabId) {
 
 loadGame();
 setupNewsTicker();
-fetchGlobalLeaderboard(); 
-
-// Automātiski atjaunojam Topu ik pēc 20 sekundēm
-setInterval(fetchGlobalLeaderboard, 20000);
 
 pepeImg.addEventListener("click", (e) => {
     let gained = clickPower;
@@ -268,83 +258,6 @@ function formatTime(ms) {
     return display;
 }
 
-// LIELISKA UN DROŠA REKORDU NOLASĪŠANA AR CILVĒCĪGU GALVEŅU SAKĀRTOŠANU CORS DROŠĪBAI
-function fetchGlobalLeaderboard() {
-    if (!leaderboardListDisplay) return;
-
-    fetch(`${GLOBAL_LEADERBOARD_URL}?meta=false`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            "X-Master-Key": MY_MASTER_KEY
-        }
-    })
-    .then(response => {
-        if (!response.ok) throw new Error("Database offline");
-        return response.json();
-    })
-    .then(records => {
-        let actualRecords = Array.isArray(records) ? records : [];
-
-        if (actualRecords.length === 0) {
-            leaderboardListDisplay.innerHTML = `<li style="color: #889888; text-align: center; list-style: none;">No records yet! Defeat MrBeast!</li>`;
-            return;
-        }
-
-        actualRecords.sort((a, b) => a.time - b.time);
-
-        leaderboardListDisplay.innerHTML = actualRecords.slice(0, 5).map((rec, index) => {
-            let medal = "";
-            if (index === 0) medal = "🥇 ";
-            if (index === 1) medal = "🥈 ";
-            if (index === 2) medal = "🥉 ";
-            let playerName = rec.player ? rec.player.replace(/[<>]/g, "") : "Anonymous Frog";
-            return `<li style="margin-bottom: 5px; color: #e0e0e0; list-style: none; font-size: 13px;">${medal}<b>${playerName}</b>: <span style="color:#ff9800">${formatTime(rec.time)}</span></li>`;
-        }).join("");
-    })
-    .catch(err => {
-        console.log("Leaderboard syncing cleanly via CORS...");
-    });
-}
-
-// DROŠA JAUNU REKORDU PIEVIENOŠANA TAVAM MASĪVAM
-function uploadGlobalRecord(playerName, timeMs) {
-    fetch(`${GLOBAL_LEADERBOARD_URL}?meta=false`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            "X-Master-Key": MY_MASTER_KEY
-        }
-    })
-    .then(res => {
-        if (!res.ok) return [];
-        return res.json();
-    })
-    .then(records => {
-        let actualRecords = Array.isArray(records) ? records : [];
-        
-        actualRecords.push({
-            player: playerName,
-            time: timeMs
-        });
-
-        return fetch(GLOBAL_LEADERBOARD_URL, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                "X-Master-Key": MY_MASTER_KEY
-            },
-            body: JSON.stringify(actualRecords)
-        });
-    })
-    .then(res => res.json())
-    .then(() => {
-        console.log("Score successfully posted!");
-        fetchGlobalLeaderboard();
-    })
-    .catch(err => console.error("Database sync failed:", err));
-}
-
 function updateUI() {
     let calculatedFPS = 0;
 
@@ -410,18 +323,10 @@ function updateUI() {
         gameWon = true;
         let timeTaken = Date.now() - startTime;
         
-        let name = prompt(`🏆 PEPE DEFEATED MRBEAST IN ${formatTime(timeTaken)}!\nEnter your name for the Global Speedrun Leaderboard:`, "GreenFrog");
-        
-        if (!name || name.trim() === "") {
-            name = "Player Frog";
-        }
+        alert(`🏆 TU UZVARĒJI MRBEAST LAIKĀ: ${formatTime(timeTaken)}!`);
 
         bestTimes.push(timeTaken);
         mrBeastFollowers = Infinity;
-        
-        let cleanName = name.replace(/[<>]/g, "").substring(0, 14);
-        
-        uploadGlobalRecord(cleanName, timeTaken); 
         saveGame();
     }
 }
@@ -483,7 +388,7 @@ function loadGame() {
 }
 
 function resetGame() {
-    if (confirm("Reset your current followers and upgrades to start a new speedrun? (Your global leaderboard scores will stay!)")) {
+    if (confirm("Reset your current followers and upgrades to start a new speedrun?")) {
         localStorage.removeItem("pepeClickerAdvancedSave");
         
         pepeFollowers = 0;
