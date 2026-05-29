@@ -3,7 +3,7 @@ let pepeFollowers = 0;
 let followersPerSecond = 0;
 let clickPower = 1;
 let clickUpgradeCost = 50;
-let clickUpgradeLevel = 0; // NEW: Sekojam līdzi arī klikšķu uzlabojuma līmenim
+let clickUpgradeLevel = 0;
 let mrBeastFollowers = 492000000;
 
 // Skill Tree & Prestige Variables
@@ -37,8 +37,21 @@ const spCountDisplay = document.getElementById("sp-count");
 const beastGrowthRateDisplay = document.getElementById("beast-growth-rate");
 const rebirthBtn = document.getElementById("rebirth-btn");
 const pepeImg = document.getElementById("pepe-img");
+const clickZone = document.getElementById("click-zone");
 
 let sabotageCooldown = false;
+
+// Ticker News List
+const newsDatabase = [
+    "MrBeast paziņo par jaunu video. Pepe šobrīd ēd čipsus un domā, kā viņu apdzīt.",
+    "Finanšu eksperti ir šokā: Pepe Coin vērtība tuvojas kosmosam!",
+    "Baumas: Pepe plāno iegādāties YouTube un pārdēvēt to par PepeTube.",
+    "MrBeast esot redzēts mēģinām izdomāt mēmi, bet viņam nesanāca tik labi kā Pepe.",
+    "BREAKING: Īstie sekotāji sāk saprast, ka zaļās vardes ir foršākas par bezmaksas mašīnām.",
+    "Zinātnieki pierāda: klikšķināšana uz Pepe uzlabo garastāvokli par 420%.",
+    "MrBeast pazaudēja savas zeķes. Pepe tikmēr turpina krāt sekotājus.",
+    "Sociālie tīkli vārās! Pepe tikko publicēja bildi, kas savāca miljonu skatījumu 2 sekundēs."
+];
 
 // Tabs Switching
 function switchTab(tabId) {
@@ -57,29 +70,65 @@ function switchTab(tabId) {
 }
 
 loadGame();
+setupNewsTicker();
 
-// Clicking Logic
-pepeImg.addEventListener("click", () => {
+// Clicking Logic ar Vizuālo Efektu (Floating Text)
+pepeImg.addEventListener("click", (e) => {
     let gained = clickPower;
+    let isCrit = false;
+
     if (skills.blue1.purchased) gained *= 2;
     if (skills.blue2.purchased) {
-        if (Math.random() < 0.05) gained *= 10;
+        if (Math.random() < 0.05) {
+            gained *= 10;
+            isCrit = true; // Kritiskais klikšķis!
+        }
     }
     pepeFollowers += gained;
+    
+    // Izsaucam peldošā teksta funkciju, padodot peles koordinātas
+    createFloatingText(e.clientX, e.clientY, gained, isCrit);
+
     updateUI();
 });
+
+// Peldošā teksta izveide
+function createFloatingText(x, y, amount, isCrit) {
+    const textNode = document.createElement("div");
+    textNode.innerText = `+${amount.toLocaleString()}${isCrit ? " CRIT! 🔥" : ""}`;
+    textNode.className = isCrit ? "floating-text crit-text" : "floating-text";
+    
+    // Novietojam elementu tieši tur, kur lietotājs uzklikšķināja
+    textNode.style.left = `${x}px`;
+    textNode.style.top = `${y}px`;
+    
+    document.body.appendChild(textNode);
+    
+    // Pēc 1 sekundes izdzēšam elementu no koda, lai nepārslogotu pārlūku
+    setTimeout(() => {
+        textNode.remove();
+    }, 1000);
+}
+
+// Ziņu lentes uzstādīšana un rotācija
+function setupNewsTicker() {
+    const newsText = document.getElementById("news-text");
+    setInterval(() => {
+        if (newsText) {
+            const randomIndex = Math.floor(Math.random() * newsDatabase.length);
+            newsText.innerText = newsDatabase[randomIndex];
+        }
+    }, 15000); // Maina ziņu ik pēc 15 sekundēm
+}
 
 // Click Upgrade
 function buyClickUpgrade() {
     let activeCost = getModifiedCost(clickUpgradeCost);
     if (pepeFollowers >= activeCost) {
         pepeFollowers -= activeCost;
-        clickUpgradeLevel++; // Palielinām līmeni
+        clickUpgradeLevel++;
         
-        // Aprēķinām bāzes klikšķa jaudu (katrs līmenis dod +1)
         let baseClickAddition = clickUpgradeLevel;
-        
-        // NEW: "Apaļo skaitļu" bonuss klikšķiem (ik pēc 10 līmeņiem jauda dubultojas x2)
         let multiplier = 1;
         if (clickUpgradeLevel >= 10) multiplier *= 2;
         if (clickUpgradeLevel >= 25) multiplier *= 2;
@@ -102,7 +151,7 @@ function buyUpgrade(id) {
     
     if (pepeFollowers >= activeCost) {
         pepeFollowers -= activeCost;
-        upgrade.count++; // Šis kalpo kā "Level"
+        upgrade.count++;
         upgrade.cost = Math.round(upgrade.baseCost * Math.pow(1.15, upgrade.count));
         updateUI();
         saveGame();
@@ -171,6 +220,8 @@ function triggerSabotage() {
 
     if (mrBeastFollowers !== Infinity) {
         mrBeastFollowers = Math.max(0, mrBeastFollowers - 50000);
+        const newsText = document.getElementById("news-text");
+        if (newsText) newsText.innerText = "🚨 BREAKING: Noslēpumainā kārtā MrBeast tikko zaudēja 50,000 sekotāju! Pepe izskatās nevainīgi...";
     }
     pepeFollowers += 25000;
 
@@ -204,33 +255,27 @@ function triggerSabotage() {
 function updateUI() {
     let calculatedFPS = 0;
 
-    // Aprēķinām katra uzlabojuma efektivitāti ar līmeņu bonusiem
     for (let id in upgrades) {
         let upgrade = upgrades[id];
         let currentItemFPS = upgrade.count * upgrade.fpsBonus;
         
-        // NEW: "Apaļo skaitļu" bonusa sistēma (Multiplier)
         let itemMultiplier = 1;
         if (upgrade.count >= 10) itemMultiplier *= 2;
         if (upgrade.count >= 25) itemMultiplier *= 2;
         if (upgrade.count >= 50) itemMultiplier *= 2;
         if (upgrade.count >= 100) itemMultiplier *= 2;
         
-        // Pieskaitām kopējam FPS reizināto vērtību
         calculatedFPS += (currentItemFPS * itemMultiplier);
 
-        // Atjauninām līmeņa tekstu HTML pusē
         let lvlDisplay = document.getElementById(`upgrade${id}-lvl`);
         if (lvlDisplay) {
             lvlDisplay.innerText = `Lvl ${upgrade.count}`;
-            // Ja ir aktīvs kāds bonuss, pieliekam vizuālu zīmīti, piemēram, (x2)
             if (itemMultiplier > 1) {
                 lvlDisplay.innerText += ` (x${itemMultiplier})`;
             }
         }
     }
 
-    // Atjauninām klikšķu līmeņa displeju
     let clickLvlDisplay = document.getElementById(`upgrade0-lvl`);
     if (clickLvlDisplay) {
         clickLvlDisplay.innerText = `Lvl ${clickUpgradeLevel}`;
@@ -293,7 +338,7 @@ function saveGame() {
         pepeFollowers: pepeFollowers,
         clickPower: clickPower,
         clickUpgradeCost: clickUpgradeCost,
-        clickUpgradeLevel: clickUpgradeLevel, // NEW: Saglabājam klikšķu līmeni
+        clickUpgradeLevel: clickUpgradeLevel,
         mrBeastFollowers: mrBeastFollowers,
         skillPoints: skillPoints,
         rebirthsCount: rebirthsCount,
@@ -310,7 +355,7 @@ function loadGame() {
         pepeFollowers = save.pepeFollowers || 0;
         clickPower = save.clickPower || 1;
         clickUpgradeCost = save.clickUpgradeCost || 50;
-        clickUpgradeLevel = save.clickUpgradeLevel || 0; // NEW: Ielādējam klikšķu līmeni
+        clickUpgradeLevel = save.clickUpgradeLevel || 0;
         mrBeastFollowers = save.mrBeastFollowers || 492000000;
         skillPoints = save.skillPoints || 0;
         rebirthsCount = save.rebirthsCount || 0;
