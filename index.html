@@ -9,116 +9,146 @@
 <body>
 
     <div class="game-container">
-        <h1>Help Pepe Overtake MrBeast!</h1>
-        
-        <div class="scoreboard">
-            <div class="stat-box">
-                <h2>Pepe Followers</h2>
-                <p id="pepe-count">0</p>
-                <p class="sub-text">Per Second (FPS): <span id="fps-count">0</span></p>
-                <p class="sub-text">Click Power: <span id="click-power-count">1</span></p>
-            </div>
+        <div class="main-panel">
+            <h1>Help Pepe Overtake MrBeast!</h1>
             
-            <div class="stat-box target">
-                <h2>MrBeast Followers</h2>
-                <p id="beast-count">491,000,000</p>
-                <p class="sub-text">Gaining: <span id="beast-growth-rate">2</span>/sec</p>
+            <div class="scoreboard">
+                <div class="stat-box pepe-box">
+                    <h2>Pepe Followers</h2>
+                    <p id="pepe-count">0</p>
+                    <div class="sub-stats">
+                        <span>Per Second: <strong id="fps-count">0</strong></span>
+                        <span>Click Power: <strong id="click-power-count">1</strong></span>
+                    </div>
+                </div>
+                
+                <div class="stat-box beast-box">
+                    <h2>MrBeast Followers</h2>
+                    <p id="beast-count">491,000,000</p>
+                    <div class="sub-stats">
+                        <span>Gaining: <strong id="beast-growth-rate">2</strong>/sec</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="click-zone">
+                <img src="pepe.png" id="pepe-img" alt="Pepe">
+            </div>
+
+            <div class="control-buttons">
+                <button onclick="saveGame()" class="ctrl-btn save-btn">💾 Save</button>
+                <button id="rebirth-btn" onclick="triggerRebirth()" class="ctrl-btn rebirth-btn">✨ Rebirth (100k)</button>
+                <button onclick="resetGame()" class="ctrl-btn reset-btn">🔄 Reset</button>
             </div>
         </div>
 
-        <div class="click-zone">
-            <img src="pepe.png" id="pepe-img" alt="Pepe" title="Click me!">
-        </div>
+        <div class="menu-panel">
+            <div class="tabs-nav">
+                <button id="tab-shop-btn" class="tab-btn active" onclick="switchTab('shop')">🛒 Shop</button>
+                <button id="tab-skills-btn" class="tab-btn" onclick="switchTab('skills')">🌳 Skill Tree (<span id="sp-count">0</span> SP)</button>
+            </div>
 
-        <div class="control-buttons">
-            <button onclick="saveGame()" class="ctrl-btn">💾 Save Game</button>
-            <button id="rebirth-btn" onclick="triggerRebirth()" class="ctrl-btn rebirth-btn">✨ Rebirth (Requires 100k Followers)</button>
-            <button onclick="resetGame()" class="ctrl-btn reset">🔄 Reset Progress</button>
-        </div>
+            <div id="tab-shop" class="tab-content active-content">
+                <div class="shop-list">
+                    <div class="upgrade-item click-upgrade">
+                        <div class="upgrade-info">
+                            <h3>💪 Stronger Clicks</h3>
+                            <p>Gives: +1 per Click</p>
+                        </div>
+                        <button id="upgrade0-btn" onclick="buyClickUpgrade()">Cost: 50</button>
+                    </div>
 
-        <h2 class="section-title">🐸 Pepe's Skill Tree 🐸</h2>
-        <p class="sp-display">Available Skill Points: <span id="sp-count">0</span></p>
-        
-        <div class="skill-tree">
-            <div class="skill-branch blue-branch">
-                <h3>⚡ Click Mastery</h3>
-                <div class="skill-node">
-                    <button id="skill-blue1" onclick="buySkill('blue1')">Double Click (Cost: 1 SP)</button>
-                    <p class="skill-desc">Clicks give x2 more followers</p>
+                    <div class="upgrade-item">
+                        <div class="upgrade-info">
+                            <h3>Create a Meme</h3>
+                            <p>Gives: +1 follower/sec</p>
+                        </div>
+                        <button id="upgrade1-btn" onclick="buyUpgrade(1)">Cost: 15</button>
+                    </div>
+                    
+                    <div class="upgrade-item">
+                        <div class="upgrade-info">
+                            <h3>Viral Video</h3>
+                            <p>Gives: +10 followers/sec</p>
+                        </div>
+                        <button id="upgrade2-btn" onclick="buyUpgrade(2)">Cost: 100</button>
+                    </div>
+
+                    <div class="upgrade-item">
+                        <div class="upgrade-info">
+                            <h3>Collab Stream</h3>
+                            <p>Gives: +100 followers/sec</p>
+                        </div>
+                        <button id="upgrade3-btn" onclick="buyUpgrade(3)">Cost: 1,100</button>
+                    </div>
+
+                    <div class="upgrade-item">
+                        <div class="upgrade-info">
+                            <h3>Pepe Crypto Coin</h3>
+                            <p>Gives: +1,000 followers/sec</p>
+                        </div>
+                        <button id="upgrade4-btn" onclick="buyUpgrade(4)">Cost: 12,000</button>
+                    </div>
+
+                    <div class="upgrade-item">
+                        <div class="upgrade-info">
+                            <h3>World Tour</h3>
+                            <p>Gives: +10,000 followers/sec</p>
+                        </div>
+                        <button id="upgrade5-btn" onclick="buyUpgrade(5)">Cost: 130,000</button>
+                    </div>
+
+                    <div class="upgrade-item">
+                        <div class="upgrade-info">
+                            <h3>Buy Twitter (X)</h3>
+                            <p>Gives: +100,000 followers/sec</p>
+                        </div>
+                        <button id="upgrade6-btn" onclick="buyUpgrade(6)">Cost: 1,500,000</button>
+                    </div>
                 </div>
-                <div class="skill-node">
-                    <button id="skill-blue2" onclick="buySkill('blue2')" class="locked">Critical Clicks (Cost: 2 SP)</button>
-                    <p class="skill-desc">5% chance to get x10 followers per click</p>
+            </div>
+
+            <div id="tab-skills" class="tab-content">
+                <div class="skill-tree-container">
+                    <div class="skill-path blue-path">
+                        <h4>⚡ Click Mastery</h4>
+                        <div class="skill-card">
+                            <button id="skill-blue1" onclick="buySkill('blue1')">Double Click (1 SP)</button>
+                            <p>Clicks give x2 followers</p>
+                        </div>
+                        <div class="path-line">↓</div>
+                        <div class="skill-card">
+                            <button id="skill-blue2" onclick="buySkill('blue2')" class="locked">Critical Clicks (2 SP)</button>
+                            <p>5% chance for x10 click power</p>
+                        </div>
+                    </div>
+
+                    <div class="skill-path green-path">
+                        <h4>🌱 Passive Growth</h4>
+                        <div class="skill-card">
+                            <button id="skill-green1" onclick="buySkill('green1')">Meme Synergy (1 SP)</button>
+                            <p>All shop items cost 15% less</p>
+                        </div>
+                        <div class="path-line">↓</div>
+                        <div class="skill-card">
+                            <button id="skill-green2" onclick="buySkill('green2')" class="locked">Meme Empire (2 SP)</button>
+                            <p>Boosts total FPS by +25%</p>
+                        </div>
+                    </div>
+
+                    <div class="skill-path red-path">
+                        <h4>🔥 Sabotage Beast</h4>
+                        <div class="skill-card">
+                            <button id="skill-red1" onclick="buySkill('red1')">Copyright Strike (1 SP)</button>
+                            <p>Reduces MrBeast growth by 50%</p>
+                        </div>
+                        <div class="path-line">↓</div>
+                        <div class="skill-card">
+                            <button id="skill-red2" onclick="buySkill('red2')" class="locked">Cancel Culture (2 SP)</button>
+                            <p>Instantly removes 10M from Beast</p>
+                        </div>
+                    </div>
                 </div>
-            </div>
-
-            <div class="skill-branch green-branch">
-                <h3>🌱 Passive Growth</h3>
-                <div class="skill-node">
-                    <button id="skill-green1" onclick="buySkill('green1')">Meme Synergy (Cost: 1 SP)</button>
-                    <p class="skill-desc">All shop items cost 15% less</p>
-                </div>
-                <div class="skill-node">
-                    <button id="skill-green2" onclick="buySkill('green2')" class="locked">Meme Empire (Cost: 2 SP)</button>
-                    <p class="skill-desc">Boosts your total FPS by +25%</p>
-                </div>
-            </div>
-
-            <div class="skill-branch red-branch">
-                <h3>🔥 Sabotage Beast</h3>
-                <div class="skill-node">
-                    <button id="skill-red1" onclick="buySkill('red1')">Copyright Strike (Cost: 1 SP)</button>
-                    <p class="skill-desc">Reduces MrBeast's growth by 50%</p>
-                </div>
-                <div class="skill-node">
-                    <button id="skill-red2" onclick="buySkill('red2')" class="locked">Cancel Culture (Cost: 2 SP)</button>
-                    <p class="skill-desc">Instantly removes 10M from MrBeast</p>
-                </div>
-            </div>
-        </div>
-
-        <h2 class="section-title">Shop & Upgrades</h2>
-        <div class="shop">
-            <div class="upgrade-card style-click">
-                <h3>💪 Stronger Clicks</h3>
-                <p>Gives: +1 per Click</p>
-                <button id="upgrade0-btn" onclick="buyClickUpgrade()">Cost: 50 followers</button>
-            </div>
-
-            <div class="upgrade-card">
-                <h3>Create a Meme</h3>
-                <p>Gives: +1 follower/sec</p>
-                <button id="upgrade1-btn" onclick="buyUpgrade(1)">Cost: 15 followers</button>
-            </div>
-            
-            <div class="upgrade-card">
-                <h3>Viral Video</h3>
-                <p>Gives: +10 followers/sec</p>
-                <button id="upgrade2-btn" onclick="buyUpgrade(2)">Cost: 100 followers</button>
-            </div>
-
-            <div class="upgrade-card">
-                <h3>Collab Stream</h3>
-                <p>Gives: +100 followers/sec</p>
-                <button id="upgrade3-btn" onclick="buyUpgrade(3)">Cost: 1,100 followers</button>
-            </div>
-
-            <div class="upgrade-card">
-                <h3>Pepe Crypto Coin</h3>
-                <p>Gives: +1,000 followers/sec</p>
-                <button id="upgrade4-btn" onclick="buyUpgrade(4)">Cost: 12,000 followers</button>
-            </div>
-
-            <div class="upgrade-card">
-                <h3>World Tour</h3>
-                <p>Gives: +10,000 followers/sec</p>
-                <button id="upgrade5-btn" onclick="buyUpgrade(5)">Cost: 130,000 followers</button>
-            </div>
-
-            <div class="upgrade-card">
-                <h3>Buy Twitter (X)</h3>
-                <p>Gives: +100,000 followers/sec</p>
-                <button id="upgrade6-btn" onclick="buyUpgrade(6)">Cost: 1,500,000 followers</button>
             </div>
         </div>
     </div>
