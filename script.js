@@ -6,6 +6,11 @@ let clickUpgradeCost = 50;
 let clickUpgradeLevel = 0;
 let mrBeastFollowers = 492000000;
 
+// Speedrun Timer Variables
+let startTime = Date.now();
+let gameWon = false;
+let bestTimes = []; // Masīvs, kur glabāsies labākie laiki
+
 // Skill Tree & Prestige Variables
 let skillPoints = 0;
 let rebirthsCount = 0;
@@ -37,7 +42,8 @@ const spCountDisplay = document.getElementById("sp-count");
 const beastGrowthRateDisplay = document.getElementById("beast-growth-rate");
 const rebirthBtn = document.getElementById("rebirth-btn");
 const pepeImg = document.getElementById("pepe-img");
-const clickZone = document.getElementById("click-zone");
+const currentTimerDisplay = document.getElementById("current-timer");
+const leaderboardListDisplay = document.getElementById("leaderboard-list");
 
 let sabotageCooldown = false;
 
@@ -96,8 +102,10 @@ function createFloatingText(x, y, amount, isCrit) {
     textNode.innerText = `+${amount.toLocaleString()}${isCrit ? " CRIT! 🔥" : ""}`;
     textNode.className = isCrit ? "floating-text crit-text" : "floating-text";
     
-    textNode.style.left = `${x}px`;
-    textNode.style.top = `${y}px`;
+    if(textNode.style) {
+        textNode.style.left = `${x}px`;
+        textNode.style.top = `${y}px`;
+    }
     
     document.body.appendChild(textNode);
     
@@ -248,6 +256,43 @@ function triggerSabotage() {
     }, 1000);
 }
 
+// Funkcija laika formatēšanai (no milisekundēm uz MM:SS vai HH:MM:SS)
+function formatTime(ms) {
+    let totalSeconds = Math.floor(ms / 1000);
+    let hours = Math.floor(totalSeconds / 3600);
+    let minutes = Math.floor((totalSeconds % 3600) / 60);
+    let seconds = totalSeconds % 60;
+
+    let display = "";
+    if (hours > 0) {
+        display += (hours < 10 ? "0" : "") + hours + ":";
+    }
+    display += (minutes < 10 ? "0" : "") + minutes + ":";
+    display += (seconds < 10 ? "0" : "") + seconds;
+    return display;
+}
+
+// Funkcija Leaderboard vizuālai atjaunošanai
+function updateLeaderboardUI() {
+    if (!leaderboardListDisplay) return;
+    if (bestTimes.length === 0) {
+        leaderboardListDisplay.innerHTML = `<li style="color: #889888;">No records yet! Defeat MrBeast!</li>`;
+        return;
+    }
+
+    // Sakārtojam laikus no ātrākā uz lēnāko
+    bestTimes.sort((a, b) => a - b);
+    
+    // Parādām tikai top 5 labākos laikus
+    leaderboardListDisplay.innerHTML = bestTimes.slice(0, 5).map((time, index) => {
+        let medal = "";
+        if (index === 0) medal = "🥇 ";
+        if (index === 1) medal = "🥈 ";
+        if (index === 2) medal = "🥉 ";
+        return `<li style="margin-bottom: 3px; color: #e0e0e0;">${medal}<b>${formatTime(time)}</b></li>`;
+    }).join("");
+}
+
 function updateUI() {
     let calculatedFPS = 0;
 
@@ -307,9 +352,17 @@ function updateUI() {
         rebirthBtn.style.background = "#7b1fa2";
     }
 
-    if (pepeFollowers >= mrBeastFollowers && mrBeastFollowers !== Infinity) {
-        alert("Pepe wins! 🐸👑");
+    // PĀRBAUDE: VAI PEPE UZVARĒJA MRBEAST
+    if (pepeFollowers >= mrBeastFollowers && mrBeastFollowers !== Infinity && !gameWon) {
+        gameWon = true;
+        let timeTaken = Date.now() - startTime;
+        alert(`🏆 PEPE WINS! You defeated MrBeast in ${formatTime(timeTaken)}!`);
+        
+        // Pievienojam laiku rekordiem un saglabājam
+        bestTimes.push(timeTaken);
         mrBeastFollowers = Infinity;
+        updateLeaderboardUI();
+        saveGame();
     }
 }
 
@@ -339,7 +392,10 @@ function saveGame() {
         skillPoints: skillPoints,
         rebirthsCount: rebirthsCount,
         skills: skills,
-        upgrades: upgrades
+        upgrades: upgrades,
+        startTime: startTime,
+        gameWon: gameWon,
+        bestTimes: bestTimes
     };
     localStorage.setItem("pepeClickerAdvancedSave", JSON.stringify(gameSave));
 }
@@ -355,24 +411,36 @@ function loadGame() {
         mrBeastFollowers = save.mrBeastFollowers || 492000000;
         skillPoints = save.skillPoints || 0;
         rebirthsCount = save.rebirthsCount || 0;
+        startTime = save.startTime || Date.now();
+        gameWon = save.gameWon || false;
+        bestTimes = save.bestTimes || [];
         
         if (save.skills) skills = save.skills;
         if (save.upgrades) upgrades = save.upgrades;
     }
     updateUI();
     updateSkillTreeUI();
+    updateLeaderboardUI();
 }
 
 function resetGame() {
-    if (confirm("Reset everything?")) {
+    if (confirm("Reset everything? This will also reset your speedrun timer!")) {
         localStorage.removeItem("pepeClickerAdvancedSave");
         location.reload();
     }
 }
 
+// Galvenais spēles cikls (izpildās 10 reizes sekundē)
 setInterval(() => {
     if (followersPerSecond > 0) pepeFollowers += (followersPerSecond / 10);
     if (mrBeastFollowers !== Infinity) mrBeastFollowers += (skills.red1.purchased ? 0.1 : 0.2);
+    
+    // Atjaunojam speedrun taimeri uz ekrāna, ja spēle vēl nav uzvarēta
+    if (!gameWon && currentTimerDisplay) {
+        let currentDuration = Date.now() - startTime;
+        currentTimerDisplay.innerText = formatTime(currentDuration);
+    }
+    
     updateUI();
 }, 100);
 
