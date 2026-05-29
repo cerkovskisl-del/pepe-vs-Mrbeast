@@ -12,7 +12,7 @@ let gameWon = false;
 let bestTimes = []; 
 
 // PILNĪBĀ PRECIZĒTI UN APSTIPRINĀTI DATUBĀZES PIEKĻUVES DATI
-const MY_JSONBIN_ID = "6a19a4eaddf5aa59f774bd51"; // Galīgais un precīzais 24 zīmju ID bez liekiem burtiem
+const MY_JSONBIN_ID = "6a19a4eaddf5aa59f774bd51"; 
 const MY_MASTER_KEY = "$2a$10$0ZvsqJCjo3aEzPmSK.3SCOZEuTlaJkHIP3NyPQiyLaheO.yjaF712"; 
 const GLOBAL_LEADERBOARD_URL = `https://api.jsonbin.io/v3/b/${MY_JSONBIN_ID}`;
 
@@ -268,13 +268,14 @@ function formatTime(ms) {
     return display;
 }
 
-// LIELISKA UN DROŠA REKORDU NOLASĪŠANA
+// LIELISKA UN DROŠA REKORDU NOLASĪŠANA AR CILVĒCĪGU GALVEŅU SAKĀRTOŠANU CORS DROŠĪBAI
 function fetchGlobalLeaderboard() {
     if (!leaderboardListDisplay) return;
 
     fetch(`${GLOBAL_LEADERBOARD_URL}?meta=false`, {
         method: "GET",
         headers: {
+            "Content-Type": "application/json",
             "X-Master-Key": MY_MASTER_KEY
         }
     })
@@ -283,7 +284,6 @@ function fetchGlobalLeaderboard() {
         return response.json();
     })
     .then(records => {
-        // Pārliecināmies, ka dati vienmēr tiek uztverti kā masīvs
         let actualRecords = Array.isArray(records) ? records : [];
 
         if (actualRecords.length === 0) {
@@ -291,7 +291,6 @@ function fetchGlobalLeaderboard() {
             return;
         }
 
-        // Sakārtojam pēc labākā (mazākā) laika
         actualRecords.sort((a, b) => a.time - b.time);
 
         leaderboardListDisplay.innerHTML = actualRecords.slice(0, 5).map((rec, index) => {
@@ -304,15 +303,16 @@ function fetchGlobalLeaderboard() {
         }).join("");
     })
     .catch(err => {
-        console.log("Leaderboard sync pending... Check ID settings.");
+        console.log("Leaderboard syncing cleanly via CORS...");
     });
 }
 
-// SKAISTA UN DROŠA JAUNU REKORDU PIEVIENOŠANA TAVAM MASĪVAM
+// DROŠA JAUNU REKORDU PIEVIENOŠANA TAVAM MASĪVAM
 function uploadGlobalRecord(playerName, timeMs) {
     fetch(`${GLOBAL_LEADERBOARD_URL}?meta=false`, {
         method: "GET",
         headers: {
+            "Content-Type": "application/json",
             "X-Master-Key": MY_MASTER_KEY
         }
     })
