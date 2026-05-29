@@ -118,7 +118,11 @@ h1 {
     cursor: pointer;
     color: white;
     font-size: 13px;
-    transition: background 0.2s;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.ctrl-btn:active {
+    transform: scale(0.98);
 }
 
 .save-btn { background: #384633; }
@@ -127,6 +131,11 @@ h1 {
 .rebirth-btn:hover { background: #8e24aa; }
 .reset-btn { background: #5c1d1d; }
 .reset-btn:hover { background: #7a2424; }
+
+/* Sabotage pogas hover efekts (sarkanajai pogai) */
+#sabotage-btn:hover {
+    background: #cc0000 !important;
+}
 
 /* RIGHT SIDE: UPGRADES PANEL */
 .menu-panel {
@@ -171,7 +180,7 @@ h1 {
     display: none;
     flex: 1;
     padding: 15px;
-    overflow-y: auto; /* Ļauj ritināt uz leju tikai šo pusi */
+    overflow-y: auto;
 }
 
 .tab-content.active-content {
@@ -204,6 +213,8 @@ h1 {
     margin: 0;
     font-size: 15px;
     color: white;
+    display: flex;
+    align-items: center;
 }
 
 .upgrade-info p {
@@ -222,10 +233,15 @@ h1 {
     cursor: pointer;
     min-width: 110px;
     font-size: 13px;
+    transition: background 0.2s, transform 0.1s;
 }
 
 .upgrade-item button:hover {
     background: #e68a00;
+}
+
+.upgrade-item button:active {
+    transform: scale(0.95);
 }
 
 /* SKILL TREE STYLES */
@@ -273,6 +289,7 @@ h1 {
     background: #5d4037;
     color: white;
     font-size: 12px;
+    transition: background 0.2s;
 }
 
 .skill-card button.unlocked { background: #4caf50 !important; cursor: default; }
@@ -289,4 +306,23 @@ h1 {
     margin: 3px 0;
     font-weight: bold;
     color: #555;
+}
+
+/* NEW: LEVEL INDIKATORA STILS VEIKALĀ */
+.lvl-tag {
+    font-size: 11px;
+    background: #2d3829;
+    color: #88a888;
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-left: 8px;
+    font-weight: bold;
+    display: inline-block;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+/* Ja līmeņa tekstā JavaScript ievieto reizinātāju (piemēram, satur "x2" vai "x4"), 
+   tas automātiski iemirdzēsies zeltītā krāsā kā reāls sasniegums */
+.lvl-tag[id*="-lvl"]:not(:empty) {
+    transition: all 0.3s ease;
 }
