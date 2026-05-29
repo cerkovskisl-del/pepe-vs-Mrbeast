@@ -89,6 +89,7 @@ pepeImg.addEventListener("click", (e) => {
     pepeFollowers += gained;
     
     createFloatingText(e.clientX, e.clientY, gained, isCrit);
+    checkVictory(); // Pārbaudām uzvaru uzreiz pēc klikšķa
     updateUI();
 });
 
@@ -222,6 +223,7 @@ function triggerSabotage() {
     let timeLeft = 60;
     const sabotageBtn = document.getElementById("sabotage-btn");
 
+    checkVictory();
     updateUI();
     saveGame();
 
@@ -256,6 +258,26 @@ function formatTime(ms) {
     display += (minutes < 10 ? "0" : "") + minutes + ":";
     display += (seconds < 10 ? "0" : "") + seconds;
     return display;
+}
+
+// ATSEVIŠĶA, DROŠA UZVARAS FUNKCIJA (novērš bezgalīgos alert logus)
+function checkVictory() {
+    if (mrBeastFollowers !== Infinity && pepeFollowers >= mrBeastFollowers && !gameWon) {
+        gameWon = true;
+        mrBeastFollowers = Infinity; // Uzreiz apturam MrBeast skaitītāju
+        
+        let timeTaken = Date.now() - startTime;
+        if (!bestTimes) bestTimes = [];
+        bestTimes.push(timeTaken);
+        
+        saveGame();
+        updateUI();
+
+        // Izsaucam alert pēc nelielas pauzes, lai UI paspēj parādīt skaitļus
+        setTimeout(() => {
+            alert(`🏆 TU UZVARĒJI MRBEAST LAIKĀ: ${formatTime(timeTaken)}!`);
+        }, 50);
+    }
 }
 
 function updateUI() {
@@ -303,13 +325,19 @@ function updateUI() {
     }
 
     if (pepeCountDisplay) pepeCountDisplay.innerText = Math.floor(pepeFollowers).toLocaleString();
-    if (beastCountDisplay) beastCountDisplay.innerText = Math.floor(mrBeastFollowers).toLocaleString();
+    if (beastCountDisplay) {
+        if (mrBeastFollowers === Infinity) {
+            beastCountDisplay.innerText = "OVERTAKEN! 🐸";
+        } else {
+            beastCountDisplay.innerText = Math.floor(mrBeastFollowers).toLocaleString();
+        }
+    }
     if (fpsCountDisplay) fpsCountDisplay.innerText = followersPerSecond.toLocaleString();
     if (clickPowerDisplay) clickPowerDisplay.innerText = clickPower.toLocaleString();
     if (spCountDisplay) spCountDisplay.innerText = skillPoints;
 
     let beastSpeed = skills.red1.purchased ? 1 : 2;
-    if (beastGrowthRateDisplay) beastGrowthRateDisplay.innerText = beastSpeed;
+    if (beastGrowthRateDisplay) beastGrowthRateDisplay.innerText = mrBeastFollowers === Infinity ? "0" : beastSpeed;
 
     if (rebirthBtn) {
         if (pepeFollowers >= 100000) {
@@ -319,7 +347,7 @@ function updateUI() {
         }
     }
 
-    // --- JAUNĀ STATS LOGA ATJAUNINĀŠANA ---
+    // --- STATS LOGA ATJAUNINĀŠANA ---
     const statsRebirths = document.getElementById("stats-rebirths");
     const statsSkills = document.getElementById("stats-skills");
     const bestTimeDisplay = document.getElementById("best-time-display");
@@ -341,18 +369,6 @@ function updateUI() {
         } else {
             bestTimeDisplay.innerText = "None yet";
         }
-    }
-    // ----------------------------------------
-
-    if (pepeFollowers >= mrBeastFollowers && mrBeastFollowers !== Infinity && !gameWon) {
-        gameWon = true;
-        let timeTaken = Date.now() - startTime;
-        
-        alert(`🏆 TU UZVARĒJI MRBEAST LAIKĀ: ${formatTime(timeTaken)}!`);
-
-        bestTimes.push(timeTaken);
-        mrBeastFollowers = Infinity;
-        saveGame();
     }
 }
 
@@ -398,7 +414,7 @@ function loadGame() {
         clickPower = save.clickPower || 1;
         clickUpgradeCost = save.clickUpgradeCost || 50;
         clickUpgradeLevel = save.clickUpgradeLevel || 0;
-        mrBeastFollowers = save.mrBeastFollowers || 492000000;
+        mrBeastFollowers = save.mrBeastFollowers !== undefined ? save.mrBeastFollowers : 492000000;
         skillPoints = save.skillPoints || 0;
         rebirthsCount = save.rebirthsCount || 0;
         startTime = save.startTime || Date.now();
@@ -414,6 +430,9 @@ function loadGame() {
 
 function resetGame() {
     if (confirm("Reset your current followers and upgrades to start a new speedrun?")) {
+        // Saglabājam veco labāko laiku sarakstu pirms dzēšanas!
+        let keptBestTimes = bestTimes; 
+
         localStorage.removeItem("pepeClickerAdvancedSave");
         
         pepeFollowers = 0;
@@ -425,7 +444,7 @@ function resetGame() {
         rebirthsCount = 0;
         startTime = Date.now(); 
         gameWon = false;
-        bestTimes = [];
+        bestTimes = keptBestTimes; // Atgriežam rekordus atpakaļ
 
         for (let id in upgrades) {
             upgrades[id].count = 0;
@@ -450,6 +469,7 @@ setInterval(() => {
         currentTimerDisplay.innerText = formatTime(currentDuration);
     }
     
+    checkVictory(); // Droša pārbaude katru cikla sekundi
     updateUI();
 }, 100);
 
