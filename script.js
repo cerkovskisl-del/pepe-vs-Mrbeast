@@ -11,8 +11,8 @@ let startTime = Date.now();
 let gameWon = false;
 let bestTimes = []; 
 
-// JAUNA, STABILA UN PĀRBAUDĪTA PASAULES REKORDU DATUBĀZE
-const MY_JSONBIN_ID = "66573c7cacd3cb34a84fbe3a"; 
+// TAVI PERSONĪGIE UN STABILIE DATUBĀZES ACCESSI NO JSONBIN
+const MY_JSONBIN_ID = "6a19a4addf5aa59f774bd51"; 
 const MY_MASTER_KEY = "$2a$10$0ZvsqJCjo3aEzPmSK.3SCOZEuTlaJkHIP3NyPQiyLaheO.yjaF712"; 
 const GLOBAL_LEADERBOARD_URL = `https://api.jsonbin.io/v3/b/${MY_JSONBIN_ID}`;
 
@@ -82,7 +82,7 @@ loadGame();
 setupNewsTicker();
 fetchGlobalLeaderboard(); 
 
-// Automātiski atjaunojam Topu ik pēc 20 sekundēm
+// Automātiski sinhronizējam topu ik pēc 20 sekundēm
 setInterval(fetchGlobalLeaderboard, 20000);
 
 pepeImg.addEventListener("click", (e) => {
@@ -268,57 +268,61 @@ function formatTime(ms) {
     return display;
 }
 
-// DROŠA DATU NOLASĪŠANA
+// DROŠA UN PAREIZA REKORDU NOLASĪŠANA AR "meta=false"
 function fetchGlobalLeaderboard() {
     if (!leaderboardListDisplay) return;
 
-    fetch(`${GLOBAL_LEADERBOARD_URL}`, {
+    fetch(`${GLOBAL_LEADERBOARD_URL}?meta=false`, {
         method: "GET",
         headers: {
             "X-Master-Key": MY_MASTER_KEY
         }
     })
     .then(response => {
-        if (!response.ok) throw new Error("Database offline");
+        if (!response.ok) throw new Error("Database error");
         return response.json();
     })
-    .then(data => {
-        let records = data.record;
+    .then(records => {
+        // Pārliecināmies, ka dati vienmēr ir masīvs
+        let actualRecords = Array.isArray(records) ? records : [];
 
-        if (!Array.isArray(records) || records.length === 0) {
-            leaderboardListDisplay.innerHTML = `<li style="color: #889888;">No records yet! Defeat MrBeast!</li>`;
+        if (actualRecords.length === 0) {
+            leaderboardListDisplay.innerHTML = `<li style="color: #889888; text-align: center; list-style: none; margin-top: 5px;">No records yet! Defeat MrBeast!</li>`;
             return;
         }
 
-        records.sort((a, b) => a.time - b.time);
+        actualRecords.sort((a, b) => a.time - b.time);
 
-        leaderboardListDisplay.innerHTML = records.slice(0, 5).map((rec, index) => {
+        leaderboardListDisplay.innerHTML = actualRecords.slice(0, 5).map((rec, index) => {
             let medal = "";
             if (index === 0) medal = "🥇 ";
             if (index === 1) medal = "🥈 ";
             if (index === 2) medal = "🥉 ";
             let playerName = rec.player ? rec.player.replace(/[<>]/g, "") : "Anonymous Frog";
-            return `<li style="margin-bottom: 4px; color: #e0e0e0;">${medal}<b>${playerName}</b>: <span style="color:#ff9800">${formatTime(rec.time)}</span></li>`;
+            return `<li style="margin-bottom: 4px; color: #e0e0e0; font-size: 13px;">${medal}<b>${playerName}</b>: <span style="color:#ff9800">${formatTime(rec.time)}</span></li>`;
         }).join("");
     })
     .catch(err => {
-        console.log("Leaderboard sync pending...");
+        console.log("Leaderboard syncing...");
     });
 }
 
-// REKORDA AUGŠUPIELĀDE
+// DROŠA REKORDU SAGLABĀŠANA
 function uploadGlobalRecord(playerName, timeMs) {
-    fetch(`${GLOBAL_LEADERBOARD_URL}`, {
+    fetch(`${GLOBAL_LEADERBOARD_URL}?meta=false`, {
         method: "GET",
         headers: {
             "X-Master-Key": MY_MASTER_KEY
         }
     })
-    .then(res => res.json())
-    .then(data => {
-        let records = Array.isArray(data.record) ? data.record : [];
+    .then(res => {
+        if(!res.ok) return [];
+        return res.json();
+    })
+    .then(records => {
+        let actualRecords = Array.isArray(records) ? records : [];
         
-        records.push({
+        actualRecords.push({
             player: playerName,
             time: timeMs
         });
@@ -329,15 +333,15 @@ function uploadGlobalRecord(playerName, timeMs) {
                 "Content-Type": "application/json",
                 "X-Master-Key": MY_MASTER_KEY
             },
-            body: JSON.stringify(records)
+            body: JSON.stringify(actualRecords)
         });
     })
     .then(res => res.json())
     .then(() => {
-        console.log("Score successfully posted!");
+        console.log("Score posted successfully!");
         fetchGlobalLeaderboard();
     })
-    .catch(err => console.error("Database sync failed:", err));
+    .catch(err => console.error("Database sync issue:", err));
 }
 
 function updateUI() {
@@ -376,25 +380,29 @@ function updateUI() {
     if (skills.green2.purchased) calculatedFPS = Math.round(calculatedFPS * 1.25);
     followersPerSecond = calculatedFPS;
 
-    document.getElementById("upgrade0-btn").innerText = `${getModifiedCost(clickUpgradeCost).toLocaleString()}`;
+    let clickBtn = document.getElementById("upgrade0-btn");
+    if(clickBtn) clickBtn.innerText = `${getModifiedCost(clickUpgradeCost).toLocaleString()}`;
+    
     for (let id in upgrades) {
         let btn = document.getElementById(`upgrade${id}-btn`);
         if (btn) btn.innerText = `${getModifiedCost(upgrades[id].cost).toLocaleString()}`;
     }
 
-    pepeCountDisplay.innerText = Math.floor(pepeFollowers).toLocaleString();
-    beastCountDisplay.innerText = Math.floor(mrBeastFollowers).toLocaleString();
-    fpsCountDisplay.innerText = followersPerSecond.toLocaleString();
-    clickPowerDisplay.innerText = clickPower.toLocaleString();
-    spCountDisplay.innerText = skillPoints;
+    if(pepeCountDisplay) pepeCountDisplay.innerText = Math.floor(pepeFollowers).toLocaleString();
+    if(beastCountDisplay) beastCountDisplay.innerText = Math.floor(mrBeastFollowers).toLocaleString();
+    if(fpsCountDisplay) fpsCountDisplay.innerText = followersPerSecond.toLocaleString();
+    if(clickPowerDisplay) clickPowerDisplay.innerText = clickPower.toLocaleString();
+    if(spCountDisplay) spCountDisplay.innerText = skillPoints;
 
     let beastSpeed = skills.red1.purchased ? 1 : 2;
-    beastGrowthRateDisplay.innerText = beastSpeed;
+    if(beastGrowthRateDisplay) beastGrowthRateDisplay.innerText = beastSpeed;
 
-    if (pepeFollowers >= 100000) {
-        rebirthBtn.style.background = "#e91e63";
-    } else {
-        rebirthBtn.style.background = "#7b1fa2";
+    if(rebirthBtn) {
+        if (pepeFollowers >= 100000) {
+            rebirthBtn.style.background = "#e91e63";
+        } else {
+            rebirthBtn.style.background = "#7b1fa2";
+        }
     }
 
     if (pepeFollowers >= mrBeastFollowers && mrBeastFollowers !== Infinity && !gameWon) {
@@ -504,7 +512,7 @@ function resetGame() {
 // Spēles galvenais cikls
 setInterval(() => {
     if (followersPerSecond > 0) pepeFollowers += (followersPerSecond / 10);
-    if (mrBeastFollowers !== Infinity) mrBeastFollowers += (skills.red1.purchased ? 0.1 : 0.2);
+    if (mrBeastFollowers !== Infinity) mrBeastFollowers += (skills.red1.purchased ? 0.01 : 0.02);
     
     if (!gameWon && currentTimerDisplay) {
         let currentDuration = Date.now() - startTime;
