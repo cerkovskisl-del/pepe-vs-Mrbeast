@@ -1,190 +1,292 @@
 body {
-    background-color: #1e251c;
-    color: #ffffff;
-    font-family: 'Arial', sans-serif;
-    text-align: center;
+    background-color: #121611;
+    color: #e0e0e0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
-    padding: 20px;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
     user-select: none;
 }
 
 .game-container {
-    max-width: 900px;
-    margin: 0 auto;
-    background: #2b3627;
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0px 0px 20px rgba(0, 250, 0, 0.2);
+    display: flex;
+    width: 95vw;
+    max-width: 1100px;
+    height: 85vh;
+    max-height: 750px;
+    background: #1a2018;
+    border-radius: 20px;
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    border: 1px solid #2d3829;
 }
 
-h1, .section-title {
+/* LEFT SIDE: MAIN PANEL */
+.main-panel {
+    flex: 1.2;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    background: #151a13;
+    border-right: 1px solid #2d3829;
+}
+
+h1 {
+    font-size: 24px;
     color: #4caf50;
-    border-bottom: 2px solid #384633;
-    padding-bottom: 10px;
-    margin-top: 30px;
+    margin: 0 0 15px 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
 .scoreboard {
     display: flex;
-    justify-content: space-around;
-    margin: 20px 0;
+    width: 100%;
+    gap: 15px;
 }
 
 .stat-box {
-    background: #384633;
-    padding: 15px;
-    border-radius: 10px;
-    width: 44%;
+    flex: 1;
+    background: #1f261c;
+    padding: 12px;
+    border-radius: 12px;
+    text-align: center;
+    border: 1px solid #2d3829;
+}
+
+.stat-box h2 {
+    font-size: 14px;
+    color: #a0b0a0;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .stat-box p {
-    font-size: 26px;
+    font-size: 24px;
     font-weight: bold;
     margin: 5px 0;
 }
 
-.stat-box.target p {
-    color: #ff4a4a;
+.pepe-box p { color: #4caf50; text-shadow: 0 0 10px rgba(76, 175, 80, 0.2); }
+.beast-box p { color: #ff4a4a; text-shadow: 0 0 10px rgba(255, 74, 74, 0.2); }
+
+.sub-stats {
+    display: flex;
+    justify-content: space-around;
+    font-size: 12px;
+    color: #889888;
 }
 
-.sub-text {
-    font-size: 14px !important;
-    color: #a0b0a0;
-}
-
+/* CLICK ZONE */
 .click-zone {
-    margin: 25px 0;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #pepe-img {
-    width: 180px;
+    width: 170px;
     height: auto;
     cursor: pointer;
     transition: transform 0.05s ease-in-out;
+    filter: drop-shadow(0px 8px 16px rgba(0,0,0,0.4));
 }
 
 #pepe-img:active {
     transform: scale(0.92);
 }
 
+/* CONTROLS */
 .control-buttons {
-    margin-bottom: 25px;
+    display: flex;
+    width: 100%;
+    gap: 10px;
 }
 
 .ctrl-btn {
-    background: #444;
-    color: white;
+    flex: 1;
+    padding: 10px;
     border: none;
-    padding: 10px 18px;
-    margin: 5px;
-    border-radius: 5px;
-    cursor: pointer;
+    border-radius: 8px;
     font-weight: bold;
+    cursor: pointer;
+    color: white;
+    font-size: 13px;
+    transition: background 0.2s;
 }
 
-.rebirth-btn {
-    background: #9c27b0;
+.save-btn { background: #384633; }
+.save-btn:hover { background: #475941; }
+.rebirth-btn { background: #7b1fa2; }
+.rebirth-btn:hover { background: #8e24aa; }
+.reset-btn { background: #5c1d1d; }
+.reset-btn:hover { background: #7a2424; }
+
+/* RIGHT SIDE: UPGRADES PANEL */
+.menu-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #1a2018;
 }
-.rebirth-btn:hover {
-    background: #8e24aa;
+
+/* TABS NAVIGATION */
+.tabs-nav {
+    display: flex;
+    background: #151a13;
+    border-bottom: 1px solid #2d3829;
 }
-.ctrl-btn.reset {
-    background: #7a2424;
+
+.tab-btn {
+    flex: 1;
+    padding: 15px;
+    background: transparent;
+    border: none;
+    color: #889888;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.tab-btn:hover {
+    color: white;
+    background: rgba(255,255,255,0.02);
+}
+
+.tab-btn.active {
+    color: #4caf50;
+    border-bottom: 3px solid #4caf50;
+    background: #1a2018;
+}
+
+/* TAB CONTENTS */
+.tab-content {
+    display: none;
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto; /* Ļauj ritināt uz leju tikai šo pusi */
+}
+
+.tab-content.active-content {
+    display: block;
+}
+
+/* SHOP LIST STYLES */
+.shop-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.upgrade-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #222a1f;
+    padding: 12px 15px;
+    border-radius: 10px;
+    border: 1px solid #2d3829;
+}
+
+.click-upgrade {
+    background: #2b202a;
+    border-color: #423040;
+}
+
+.upgrade-info h3 {
+    margin: 0;
+    font-size: 15px;
+    color: white;
+}
+
+.upgrade-info p {
+    margin: 3px 0 0 0;
+    font-size: 12px;
+    color: #a0b0a0;
+}
+
+.upgrade-item button {
+    background: #ff9800;
+    color: black;
+    border: none;
+    padding: 10px 15px;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    min-width: 110px;
+    font-size: 13px;
+}
+
+.upgrade-item button:hover {
+    background: #e68a00;
 }
 
 /* SKILL TREE STYLES */
-.sp-display {
-    font-size: 18px;
-    font-weight: bold;
-    color: #ffeb3b;
-}
-
-.skill-tree {
+.skill-tree-container {
     display: flex;
-    justify-content: space-between;
-    margin: 20px 0 40px 0;
-    gap: 15px;
+    flex-direction: column;
+    gap: 20px;
 }
 
-.skill-branch {
-    width: 32%;
-    background: #222a1f;
-    padding: 15px;
-    border-radius: 10px;
-    box-sizing: border-box;
-    border: 1px solid #444;
+.skill-path {
+    background: #1f261c;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid #333;
 }
 
-.blue-branch { border-color: #2196f3; }
-.green-branch { border-color: #4caf50; }
-.red-branch { border-color: #f44336; }
+.blue-path { border-color: #1976d2; }
+.green-path { border-color: #388e3c; }
+.red-path { border-color: #d32f2f; }
 
-.skill-node {
-    background: #2d3829;
-    margin: 15px 0;
+.skill-path h4 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    text-transform: uppercase;
+}
+
+.blue-path h4 { color: #2196f3; }
+.green-path h4 { color: #4caf50; }
+.red-path h4 { color: #f44336; }
+
+.skill-card {
+    background: #171c14;
     padding: 10px;
     border-radius: 8px;
+    text-align: center;
 }
 
-.skill-node button {
+.skill-card button {
     width: 100%;
-    padding: 10px;
+    padding: 8px;
     font-weight: bold;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    background: #795548;
+    background: #5d4037;
     color: white;
-}
-
-.skill-node button.unlocked {
-    background: #4caf50 !important;
-    cursor: default;
-}
-
-.skill-node button.locked {
-    background: #555 !important;
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.skill-desc {
     font-size: 12px;
-    color: #bbb;
+}
+
+.skill-card button.unlocked { background: #4caf50 !important; cursor: default; }
+.skill-card button.locked { background: #444 !important; opacity: 0.5; cursor: not-allowed; }
+
+.skill-card p {
     margin: 5px 0 0 0;
+    font-size: 11px;
+    color: #aaa;
 }
 
-/* SHOP STYLES */
-.shop {
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 15px;
-}
-
-.upgrade-card {
-    background: #384633;
-    padding: 15px;
-    border-radius: 10px;
-    width: 31%;
-    box-sizing: border-box;
-}
-
-.style-click {
-    background: #473346;
-}
-
-.upgrade-card button {
-    background-color: #ff9800;
-    color: black;
-    border: none;
-    padding: 10px;
+.path-line {
+    text-align: center;
+    margin: 3px 0;
     font-weight: bold;
-    border-radius: 5px;
-    cursor: pointer;
-    width: 100%;
-}
-
-.upgrade-card button:hover {
-    background-color: #e68a00;
+    color: #555;
 }
