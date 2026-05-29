@@ -3,7 +3,7 @@ let pepeFollowers = 0;
 let followersPerSecond = 0;
 let clickPower = 1;
 let clickUpgradeCost = 50;
-let mrBeastFollowers = 491000000;
+let mrBeastFollowers = 492000000; // ATJAUNINĀTS: Reālais MrBeast sekotāju skaits
 
 // Skill Tree & Prestige Variables
 let skillPoints = 0;
@@ -36,6 +36,9 @@ const spCountDisplay = document.getElementById("sp-count");
 const beastGrowthRateDisplay = document.getElementById("beast-growth-rate");
 const rebirthBtn = document.getElementById("rebirth-btn");
 const pepeImg = document.getElementById("pepe-img");
+
+// Secret Sabotage Cooldown mainīgais
+let sabotageCooldown = false;
 
 // NEW: Tabs Switching Function
 function switchTab(tabId) {
@@ -149,6 +152,47 @@ function triggerRebirth() {
     }
 }
 
+// NEW: Secret Sabotage Button Function
+function triggerSabotage() {
+    if (sabotageCooldown) return;
+
+    // 1. Atver MrBeast YouTube kanālu jauna cilnē
+    window.open("https://www.youtube.com/@MrBeast", "_blank");
+
+    // 2. Maina skaitītājus spēles iekšienē
+    if (mrBeastFollowers !== Infinity) {
+        mrBeastFollowers = Math.max(0, mrBeastFollowers - 50000); // Atņemam Beast 50k
+    }
+    pepeFollowers += 25000; // Pieskaitām Pepe 25k bonusu
+
+    // 3. Uzstāda 60 sekunžu dzesēšanas laiku (cooldown)
+    sabotageCooldown = true;
+    let timeLeft = 60;
+    const sabotageBtn = document.getElementById("sabotage-btn");
+
+    updateUI();
+    saveGame();
+
+    let cooldownTimer = setInterval(() => {
+        timeLeft--;
+        if (sabotageBtn) {
+            sabotageBtn.innerText = `⏳ Cooldown: ${timeLeft}s`;
+            sabotageBtn.style.background = "#555";
+            sabotageBtn.style.cursor = "not-allowed";
+        }
+
+        if (timeLeft <= 0) {
+            clearInterval(cooldownTimer);
+            sabotageCooldown = false;
+            if (sabotageBtn) {
+                sabotageBtn.innerText = "🔴 Unsubscribe from MrBeast (-50k Beast / +25k Pepe)";
+                sabotageBtn.style.background = "#ff0000";
+                sabotageBtn.style.cursor = "pointer";
+            }
+        }
+    }, 1000);
+}
+
 function updateUI() {
     let calculatedFPS = 0;
     for (let id in upgrades) {
@@ -221,7 +265,7 @@ function loadGame() {
         pepeFollowers = save.pepeFollowers || 0;
         clickPower = save.clickPower || 1;
         clickUpgradeCost = save.clickUpgradeCost || 50;
-        mrBeastFollowers = save.mrBeastFollowers || 491000000;
+        mrBeastFollowers = save.mrBeastFollowers || 492000000; // ATJAUNINĀTS: Saglabā reālo bāzi ielādējot
         skillPoints = save.skillPoints || 0;
         rebirthsCount = save.rebirthsCount || 0;
         
