@@ -130,7 +130,7 @@ h1 {
 }
 
 #pepe-img {
-    width: 290px; /* Palielināts Pepe izmērs optimālam klikšķināšanai */
+    width: 360px; /* Palielināts Pepe izmērs optimālam klikšķināšanai */
     height: auto;
     cursor: pointer;
     transition: transform 0.05s ease-in-out;
