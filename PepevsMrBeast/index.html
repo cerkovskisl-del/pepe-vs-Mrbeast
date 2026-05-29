@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pepe vs MrBeast Clicker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="game-container">
+        <h1>Palīdzi Pepe apdzīt MrBeast!</h1>
+        
+        <div class="scoreboard">
+            <div class="stat-box">
+                <h2>Pepe Sekotāji</h2>
+                <p id="pepe-count">0</p>
+                <p class="sub-text">Sekundē (FPS): <span id="fps-count">0</span></p>
+            </div>
+            
+            <div class="stat-box target">
+                <h2>MrBeast Sekotāji</h2>
+                <p id="beast-count">491,000,000</p>
+            </div>
+        </div>
+
+        <div class="click-zone">
+            <button id="click-btn">📈 Klikšķini, lai iegūtu sekotājus!</button>
+        </div>
+
+        <h2>Veikals (Upgrades)</h2>
+        <div class="shop">
+            <div class="upgrade-card">
+                <h3>Izveidot mēmi</h3>
+                <p>Dod: +1 sekotāju sekundē</p>
+                <button id="upgrade1-btn" onclick="buyUpgrade(1)">Cena: 15 sekotāji</button>
+            </div>
+            
+            <div class="upgrade-card">
+                <h3>Vírusu video</h3>
+                <p>Dod: +10 sekotājus sekundē</p>
+                <button id="upgrade2-btn" onclick="buyUpgrade(2)">Cena: 100 sekotāji</button>
+            </div>
+
+            <div class="upgrade-card">
+                <h3>Kopīgs strīms</h3>
+                <p>Dod: +100 sekotājus sekundē</p>
+                <button id="upgrade3-btn" onclick="buyUpgrade(3)">Cena: 1100 sekotāji</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
