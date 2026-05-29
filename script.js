@@ -11,8 +11,8 @@ let startTime = Date.now();
 let gameWon = false;
 let bestTimes = []; 
 
-// JAUNĀ INTEGRĒTĀ DATUBĀZE NO JSONBIN.IO (Piesaistīta tavam kontam)
-const MY_JSONBIN_ID = "6a19a4addf5aa59f774bd51"; 
+// SALABOTI UN APSTIPRINĀTI DATUBĀZES MAINĪGIE (Pilns 24-zīmju ID)
+const MY_JSONBIN_ID = "6a19a4addf5aa59f774bd51c"; 
 const MY_MASTER_KEY = "$2a$10$0ZvsqJCjo3aEzPmSK.3SCOZEuTlaJkHIP3NyPQiyLaheO.yjaF712"; 
 const GLOBAL_LEADERBOARD_URL = `https://api.jsonbin.io/v3/b/${MY_JSONBIN_ID}`;
 
@@ -268,23 +268,26 @@ function formatTime(ms) {
     return display;
 }
 
-// DROŠA UN STRĀDĀJOŠA DATU NOLASĪŠANA (JSONBin)
+// DROŠA UN STRĀDĀJOŠA DATU NOLASĪŠANA (JSONBin v3 API struktūra)
 function fetchGlobalLeaderboard() {
     if (!leaderboardListDisplay) return;
 
-    fetch(`${GLOBAL_LEADERBOARD_URL}?meta=false`, {
+    fetch(`${GLOBAL_LEADERBOARD_URL}`, {
         method: "GET",
         headers: {
             "X-Master-Key": MY_MASTER_KEY
         }
     })
     .then(response => {
-        if (!response.ok) throw new Error();
+        if (!response.ok) throw new Error("Server communication issue");
         return response.json();
     })
-    .then(records => {
+    .then(data => {
+        // JSONBin v3 vienmēr ieliek tavu masīvu iekš "record" īpašības
+        let records = data.record;
+
         if (!Array.isArray(records) || records.length === 0) {
-            leaderboardListDisplay.innerHTML = `<li style="color: #889888;">No global records yet! Be the first!</li>`;
+            leaderboardListDisplay.innerHTML = `<li style="color: #889888;">No records yet! Defeat MrBeast!</li>`;
             return;
         }
 
@@ -306,26 +309,25 @@ function fetchGlobalLeaderboard() {
     });
 }
 
-// JAUNĀ UN STRĀDĀJOŠA REKORDA AUGŠUPIELĀDE (JSONBin)
+// JAUNĀ UN STRĀDĀJOŠA REKORDA AUGŠUPIELĀDE (Ar drošu PUT atjaunināšanu)
 function uploadGlobalRecord(playerName, timeMs) {
-    // 1. Vispirms lejupielādējam esošos datus
-    fetch(`${GLOBAL_LEADERBOARD_URL}?meta=false`, {
+    fetch(`${GLOBAL_LEADERBOARD_URL}`, {
         method: "GET",
         headers: {
             "X-Master-Key": MY_MASTER_KEY
         }
     })
     .then(res => res.json())
-    .then(currentRecords => {
-        let records = Array.isArray(currentRecords) ? currentRecords : [];
+    .then(data => {
+        let records = Array.isArray(data.record) ? data.record : [];
         
-        // 2. Pievienojam jauno ierakstu masīvā
+        // Pievienojam jauno ierakstu masīvā
         records.push({
             player: playerName,
             time: timeMs
         });
 
-        // 3. Saglabājam visu atjaunoto sarakstu ar PUT metodi
+        // Saglabājam visu atjaunoto sarakstu ar PUT metodi
         return fetch(GLOBAL_LEADERBOARD_URL, {
             method: "PUT",
             headers: {
@@ -338,7 +340,6 @@ function uploadGlobalRecord(playerName, timeMs) {
     .then(res => res.json())
     .then(() => {
         console.log("Score successfully posted to JSONBin!");
-        // Uzreiz pārlādējam vizuālo Topu
         fetchGlobalLeaderboard();
     })
     .catch(err => console.error("Database sync failed:", err));
