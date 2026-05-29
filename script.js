@@ -319,6 +319,31 @@ function updateUI() {
         }
     }
 
+    // --- JAUNĀ STATS LOGA ATJAUNINĀŠANA ---
+    const statsRebirths = document.getElementById("stats-rebirths");
+    const statsSkills = document.getElementById("stats-skills");
+    const bestTimeDisplay = document.getElementById("best-time-display");
+
+    if (statsRebirths) statsRebirths.innerText = rebirthsCount;
+
+    if (statsSkills) {
+        let unlockedCount = 0;
+        for (let id in skills) {
+            if (skills[id].purchased) unlockedCount++;
+        }
+        statsSkills.innerText = `${unlockedCount}/6`;
+    }
+
+    if (bestTimeDisplay) {
+        if (bestTimes && bestTimes.length > 0) {
+            let minTime = Math.min(...bestTimes);
+            bestTimeDisplay.innerText = formatTime(minTime);
+        } else {
+            bestTimeDisplay.innerText = "None yet";
+        }
+    }
+    // ----------------------------------------
+
     if (pepeFollowers >= mrBeastFollowers && mrBeastFollowers !== Infinity && !gameWon) {
         gameWon = true;
         let timeTaken = Date.now() - startTime;
