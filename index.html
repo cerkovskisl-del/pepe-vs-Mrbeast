@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="lv">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,67 +9,74 @@
 <body>
 
     <div class="game-container">
-        <h1>Palīdzi Pepe apdzīt MrBeast!</h1>
+        <h1>Help Pepe Overtake MrBeast!</h1>
         
         <div class="scoreboard">
             <div class="stat-box">
-                <h2>Pepe Sekotāji</h2>
+                <h2>Pepe Followers</h2>
                 <p id="pepe-count">0</p>
-                <p class="sub-text">Sekundē (FPS): <span id="fps-count">0</span></p>
+                <p class="sub-text">Per Second (FPS): <span id="fps-count">0</span></p>
+                <p class="sub-text">Click Power: <span id="click-power-count">1</span></p>
             </div>
             
             <div class="stat-box target">
-                <h2>MrBeast Sekotāji</h2>
+                <h2>MrBeast Followers</h2>
                 <p id="beast-count">491,000,000</p>
-                <p class="sub-text">Aug par: 2/sek</p>
+                <p class="sub-text">Gaining: 2/sec</p>
             </div>
         </div>
 
         <div class="click-zone">
-           <img src="pepe.png" id="pepe-img" alt="Pepe" title="Klikšķini uz manis!">
+            <img src="pepe.png" id="pepe-img" alt="Pepe" title="Click me!">
         </div>
 
         <div class="control-buttons">
-            <button onclick="saveGame()" class="ctrl-btn">💾 Saglabāt</button>
-            <button onclick="resetGame()" class="ctrl-btn reset">🔄 Dzēst progresu</button>
+            <button onclick="saveGame()" class="ctrl-btn">💾 Save Game</button>
+            <button onclick="resetGame()" class="ctrl-btn reset">🔄 Reset Progress</button>
         </div>
 
-        <h2>Veikals (Upgrades)</h2>
+        <h2>Shop & Upgrades</h2>
         <div class="shop">
+            <div class="upgrade-card" style="background: #473346;">
+                <h3>💪 Stronger Clicks</h3>
+                <p>Gives: +1 per Click</p>
+                <button id="upgrade0-btn" onclick="buyClickUpgrade()">Cost: 50 followers</button>
+            </div>
+
             <div class="upgrade-card">
-                <h3>Izveidot mēmi</h3>
-                <p>Dod: +1 sek/sekundē</p>
-                <button id="upgrade1-btn" onclick="buyUpgrade(1)">Cena: 15 sekotāji</button>
+                <h3>Create a Meme</h3>
+                <p>Gives: +1 follower/sec</p>
+                <button id="upgrade1-btn" onclick="buyUpgrade(1)">Cost: 15 followers</button>
             </div>
             
             <div class="upgrade-card">
-                <h3>Vīrusu video</h3>
-                <p>Dod: +10 sek/sekundē</p>
-                <button id="upgrade2-btn" onclick="buyUpgrade(2)">Cena: 100 sekotāji</button>
+                <h3>Viral Video</h3>
+                <p>Gives: +10 followers/sec</p>
+                <button id="upgrade2-btn" onclick="buyUpgrade(2)">Cost: 100 followers</button>
             </div>
 
             <div class="upgrade-card">
-                <h3>Kopīgs strīms</h3>
-                <p>Dod: +100 sek/sekundē</p>
-                <button id="upgrade3-btn" onclick="buyUpgrade(3)">Cena: 1,100 sekotāji</button>
+                <h3>Collab Stream</h3>
+                <p>Gives: +100 followers/sec</p>
+                <button id="upgrade3-btn" onclick="buyUpgrade(3)">Cost: 1,100 followers</button>
             </div>
 
             <div class="upgrade-card">
-                <h3>Pepe Kriptovalūta</h3>
-                <p>Dod: +1,000 sek/sekundē</p>
-                <button id="upgrade4-btn" onclick="buyUpgrade(4)">Cena: 12,000 sekotāji</button>
+                <h3>Pepe Crypto Coin</h3>
+                <p>Gives: +1,000 followers/sec</p>
+                <button id="upgrade4-btn" onclick="buyUpgrade(4)">Cost: 12,000 followers</button>
             </div>
 
             <div class="upgrade-card">
-                <h3>Pasaules tūre</h3>
-                <p>Dod: +10,000 sek/sekundē</p>
-                <button id="upgrade5-btn" onclick="buyUpgrade(5)">Cena: 130,000 sekotāji</button>
+                <h3>World Tour</h3>
+                <p>Gives: +10,000 followers/sec</p>
+                <button id="upgrade5-btn" onclick="buyUpgrade(5)">Cost: 130,000 followers</button>
             </div>
 
             <div class="upgrade-card">
-                <h3>Nopirkt Twitter (X)</h3>
-                <p>Dod: +100,000 sek/sekundē</p>
-                <button id="upgrade6-btn" onclick="buyUpgrade(6)">Cena: 1,500,000 sekotāji</button>
+                <h3>Buy Twitter (X)</h3>
+                <p>Gives: +100,000 followers/sec</p>
+                <button id="upgrade6-btn" onclick="buyUpgrade(6)">Cost: 1,500,000 followers</button>
             </div>
         </div>
     </div>
