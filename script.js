@@ -1,33 +1,52 @@
-// Pamata mainīgie
+// Game Variables
 let pepeFollowers = 0;
 let followersPerSecond = 0;
+let clickPower = 1;
+let clickUpgradeCost = 50;
 let mrBeastFollowers = 491000000;
 
-// Uzlabojumu saraksts (papildināts līdz 6)
+// Passive Upgrades List
 let upgrades = {
-    1: { name: "Izveidot mēmi", cost: 15, fpsBonus: 1, count: 0 },
-    2: { name: "Vīrusu video", cost: 100, fpsBonus: 10, count: 0 },
-    3: { name: "Kopīgs strīms", cost: 1100, fpsBonus: 100, count: 0 },
-    4: { name: "Pepe Kriptovalūta", cost: 12000, fpsBonus: 1000, count: 0 },
-    5: { name: "Pasaules tūre", cost: 130000, fpsBonus: 10000, count: 0 },
-    6: { name: "Nopirkt Twitter (X)", cost: 1500000, fpsBonus: 100000, count: 0 }
+    1: { name: "Create a Meme", cost: 15, fpsBonus: 1, count: 0 },
+    2: { name: "Viral Video", cost: 100, fpsBonus: 10, count: 0 },
+    3: { name: "Collab Stream", cost: 1100, fpsBonus: 100, count: 0 },
+    4: { name: "Pepe Crypto Coin", cost: 12000, fpsBonus: 1000, count: 0 },
+    5: { name: "World Tour", cost: 130000, fpsBonus: 10000, count: 0 },
+    6: { name: "Buy Twitter (X)", cost: 1500000, fpsBonus: 100000, count: 0 }
 };
 
 const pepeCountDisplay = document.getElementById("pepe-count");
 const beastCountDisplay = document.getElementById("beast-count");
 const fpsCountDisplay = document.getElementById("fps-count");
+const clickPowerDisplay = document.getElementById("click-power-count");
 const pepeImg = document.getElementById("pepe-img");
 
-// Ielādējam spēli, kad lapa atveras
+// Load the saved game on start
 loadGame();
 
-// Klikšķis uz Pepe bildes
+// Clicking on Pepe image
 pepeImg.addEventListener("click", () => {
-    pepeFollowers += 1; // Katrs klikšķis dod 1 sekotāju
+    pepeFollowers += clickPower; // Earn based on current click power
     updateUI();
 });
 
-// Uzlabojumu pirkšana
+// Buying Click Power Upgrade
+function buyClickUpgrade() {
+    if (pepeFollowers >= clickUpgradeCost) {
+        pepeFollowers -= clickUpgradeCost;
+        clickPower += 1; // Increase click power by 1
+        clickUpgradeCost = Math.round(clickUpgradeCost * 1.5); // Click upgrade cost increases by 50%
+        
+        document.getElementById("upgrade0-btn").innerText = `Cost: ${clickUpgradeCost.toLocaleString()} followers`;
+        
+        updateUI();
+        saveGame();
+    } else {
+        alert("You don't have enough followers!");
+    }
+}
+
+// Buying Passive Upgrades
 function buyUpgrade(id) {
     let upgrade = upgrades[id];
     
@@ -35,56 +54,64 @@ function buyUpgrade(id) {
         pepeFollowers -= upgrade.cost;
         followersPerSecond += upgrade.fpsBonus;
         upgrade.count++;
-        upgrade.cost = Math.round(upgrade.cost * 1.15); // Cena pieaug par 15%
+        upgrade.cost = Math.round(upgrade.cost * 1.15); // Cost increases by 15%
         
-        document.getElementById(`upgrade${id}-btn`).innerText = `Cena: ${upgrade.cost.toLocaleString()} sekotāji`;
+        document.getElementById(`upgrade${id}-btn`).innerText = `Cost: ${upgrade.cost.toLocaleString()} followers`;
         
         updateUI();
-        saveGame(); // Automātiski saglabā pēc pirkuma
+        saveGame();
     } else {
-        alert("Tev nepietiek sekotāju!");
+        alert("You don't have enough followers!");
     }
 }
 
-// Skaitļu un ekrāna atjaunošana
+// Updating the UI numbers
 function updateUI() {
     pepeCountDisplay.innerText = Math.floor(pepeFollowers).toLocaleString();
     beastCountDisplay.innerText = Math.floor(mrBeastFollowers).toLocaleString();
     fpsCountDisplay.innerText = followersPerSecond.toLocaleString();
+    clickPowerDisplay.innerText = clickPower.toLocaleString();
     
     if (pepeFollowers >= mrBeastFollowers && mrBeastFollowers !== Infinity) {
-        alert("Neticami! Pepe ir apdzinis MrBeast un kļuvis par interneta karali! 🐸👑");
+        alert("Unbelievable! Pepe has overtaken MrBeast and became the King of the Internet! 🐸👑");
         mrBeastFollowers = Infinity;
     }
 }
 
-// Saglabāšanas funkcija (Save Game)
+// Save Game Function
 function saveGame() {
     let gameSave = {
         pepeFollowers: pepeFollowers,
         followersPerSecond: followersPerSecond,
+        clickPower: clickPower,
+        clickUpgradeCost: clickUpgradeCost,
         mrBeastFollowers: mrBeastFollowers,
         upgrades: upgrades
     };
     localStorage.setItem("pepeClickerSave", JSON.stringify(gameSave));
 }
 
-// Ielādes funkcija (Load Game)
+// Load Game Function
 function loadGame() {
     let savedData = localStorage.getItem("pepeClickerSave");
     if (savedData) {
         let save = JSON.parse(savedData);
         pepeFollowers = save.pepeFollowers;
         followersPerSecond = save.followersPerSecond;
+        clickPower = save.clickPower || 1;
+        clickUpgradeCost = save.clickUpgradeCost || 50;
         mrBeastFollowers = save.mrBeastFollowers || 491000000;
         
-        // Atjaunojam uzlabojumu datus un pogu tekstus
+        // Update click upgrade button text
+        document.getElementById("upgrade0-btn").innerText = `Cost: ${clickUpgradeCost.toLocaleString()} followers`;
+        
+        // Update passive upgrades data and button texts
         if (save.upgrades) {
             upgrades = save.upgrades;
             for (let id in upgrades) {
                 let btn = document.getElementById(`upgrade${id}-btn`);
                 if (btn) {
-                    btn.innerText = `Cena: ${upgrades[id].cost.toLocaleString()} sekotāji`;
+                    btn.innerText = `Cost: ${upgrades[id].cost.toLocaleString()} followers`;
                 }
             }
         }
@@ -92,28 +119,26 @@ function loadGame() {
     }
 }
 
-// Progresa dzēšanas funkcija (Reset)
+// Reset Game Function
 function resetGame() {
-    if (confirm("Vai tiešām vēlies dzēst visu progresu un sākt no jauna?")) {
+    if (confirm("Are you sure you want to reset all your progress and start over?")) {
         localStorage.removeItem("pepeClickerSave");
-        location.reload(); // Pārlādē lapu
+        location.reload();
     }
 }
 
-// Galvenais spēles laika cikls (Darbojas 10 reizes sekundē)
+// Main Game Loop (Runs 10 times per second)
 setInterval(() => {
-    // 1. Pepe pelna sekotājus
     if (followersPerSecond > 0) {
         pepeFollowers += (followersPerSecond / 10);
     }
     
-    // 2. MrBeast pelna 2 sekotājus sekundē (0.2 ik pēc 100ms)
     if (mrBeastFollowers !== Infinity) {
-        mrBeastFollowers += 0.2;
+        mrBeastFollowers += 0.2; // Gaining 2 per second
     }
     
     updateUI();
 }, 100);
 
-// Automātiski saglabā spēli ik pēc 30 sekundēm
+// Auto-save game every 30 seconds
 setInterval(saveGame, 30000);
