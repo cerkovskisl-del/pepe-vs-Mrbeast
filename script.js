@@ -3,7 +3,8 @@ let pepeFollowers = 0;
 let followersPerSecond = 0;
 let clickPower = 1;
 let clickUpgradeCost = 50;
-let mrBeastFollowers = 492000000; // ATJAUNINĀTS: Reālais MrBeast sekotāju skaits
+let clickUpgradeLevel = 0; // NEW: Sekojam līdzi arī klikšķu uzlabojuma līmenim
+let mrBeastFollowers = 492000000;
 
 // Skill Tree & Prestige Variables
 let skillPoints = 0;
@@ -37,18 +38,15 @@ const beastGrowthRateDisplay = document.getElementById("beast-growth-rate");
 const rebirthBtn = document.getElementById("rebirth-btn");
 const pepeImg = document.getElementById("pepe-img");
 
-// Secret Sabotage Cooldown mainīgais
 let sabotageCooldown = false;
 
-// NEW: Tabs Switching Function
+// Tabs Switching
 function switchTab(tabId) {
-    // Hide all contents
     document.getElementById("tab-shop").classList.remove("active-content");
     document.getElementById("tab-skills").classList.remove("active-content");
     document.getElementById("tab-shop-btn").classList.remove("active");
     document.getElementById("tab-skills-btn").classList.remove("active");
 
-    // Show selected content
     if (tabId === 'shop') {
         document.getElementById("tab-shop").classList.add("active-content");
         document.getElementById("tab-shop-btn").classList.add("active");
@@ -76,7 +74,19 @@ function buyClickUpgrade() {
     let activeCost = getModifiedCost(clickUpgradeCost);
     if (pepeFollowers >= activeCost) {
         pepeFollowers -= activeCost;
-        clickPower += 1;
+        clickUpgradeLevel++; // Palielinām līmeni
+        
+        // Aprēķinām bāzes klikšķa jaudu (katrs līmenis dod +1)
+        let baseClickAddition = clickUpgradeLevel;
+        
+        // NEW: "Apaļo skaitļu" bonuss klikšķiem (ik pēc 10 līmeņiem jauda dubultojas x2)
+        let multiplier = 1;
+        if (clickUpgradeLevel >= 10) multiplier *= 2;
+        if (clickUpgradeLevel >= 25) multiplier *= 2;
+        if (clickUpgradeLevel >= 50) multiplier *= 2;
+        if (clickUpgradeLevel >= 100) multiplier *= 2;
+        
+        clickPower = 1 + (baseClickAddition * multiplier);
         clickUpgradeCost = Math.round(clickUpgradeCost * 1.5);
         updateUI();
         saveGame();
@@ -92,7 +102,7 @@ function buyUpgrade(id) {
     
     if (pepeFollowers >= activeCost) {
         pepeFollowers -= activeCost;
-        upgrade.count++;
+        upgrade.count++; // Šis kalpo kā "Level"
         upgrade.cost = Math.round(upgrade.baseCost * Math.pow(1.15, upgrade.count));
         updateUI();
         saveGame();
@@ -137,6 +147,7 @@ function triggerRebirth() {
             pepeFollowers = 0;
             clickPower = 1;
             clickUpgradeCost = 50;
+            clickUpgradeLevel = 0;
             
             for (let id in upgrades) {
                 upgrades[id].count = 0;
@@ -152,20 +163,17 @@ function triggerRebirth() {
     }
 }
 
-// NEW: Secret Sabotage Button Function
+// Secret Sabotage Button
 function triggerSabotage() {
     if (sabotageCooldown) return;
 
-    // 1. Atver MrBeast YouTube kanālu jauna cilnē
     window.open("https://www.youtube.com/@MrBeast", "_blank");
 
-    // 2. Maina skaitītājus spēles iekšienē
     if (mrBeastFollowers !== Infinity) {
-        mrBeastFollowers = Math.max(0, mrBeastFollowers - 50000); // Atņemam Beast 50k
+        mrBeastFollowers = Math.max(0, mrBeastFollowers - 50000);
     }
-    pepeFollowers += 25000; // Pieskaitām Pepe 25k bonusu
+    pepeFollowers += 25000;
 
-    // 3. Uzstāda 60 sekunžu dzesēšanas laiku (cooldown)
     sabotageCooldown = true;
     let timeLeft = 60;
     const sabotageBtn = document.getElementById("sabotage-btn");
@@ -195,9 +203,45 @@ function triggerSabotage() {
 
 function updateUI() {
     let calculatedFPS = 0;
+
+    // Aprēķinām katra uzlabojuma efektivitāti ar līmeņu bonusiem
     for (let id in upgrades) {
-        calculatedFPS += upgrades[id].count * upgrades[id].fpsBonus;
+        let upgrade = upgrades[id];
+        let currentItemFPS = upgrade.count * upgrade.fpsBonus;
+        
+        // NEW: "Apaļo skaitļu" bonusa sistēma (Multiplier)
+        let itemMultiplier = 1;
+        if (upgrade.count >= 10) itemMultiplier *= 2;
+        if (upgrade.count >= 25) itemMultiplier *= 2;
+        if (upgrade.count >= 50) itemMultiplier *= 2;
+        if (upgrade.count >= 100) itemMultiplier *= 2;
+        
+        // Pieskaitām kopējam FPS reizināto vērtību
+        calculatedFPS += (currentItemFPS * itemMultiplier);
+
+        // Atjauninām līmeņa tekstu HTML pusē
+        let lvlDisplay = document.getElementById(`upgrade${id}-lvl`);
+        if (lvlDisplay) {
+            lvlDisplay.innerText = `Lvl ${upgrade.count}`;
+            // Ja ir aktīvs kāds bonuss, pieliekam vizuālu zīmīti, piemēram, (x2)
+            if (itemMultiplier > 1) {
+                lvlDisplay.innerText += ` (x${itemMultiplier})`;
+            }
+        }
     }
+
+    // Atjauninām klikšķu līmeņa displeju
+    let clickLvlDisplay = document.getElementById(`upgrade0-lvl`);
+    if (clickLvlDisplay) {
+        clickLvlDisplay.innerText = `Lvl ${clickUpgradeLevel}`;
+        let clickMultiplier = 1;
+        if (clickUpgradeLevel >= 10) clickMultiplier *= 2;
+        if (clickUpgradeLevel >= 25) clickMultiplier *= 2;
+        if (clickUpgradeLevel >= 50) clickMultiplier *= 2;
+        if (clickUpgradeLevel >= 100) clickMultiplier *= 2;
+        if (clickMultiplier > 1) clickLvlDisplay.innerText += ` (x${clickMultiplier})`;
+    }
+
     if (skills.green2.purchased) calculatedFPS = Math.round(calculatedFPS * 1.25);
     followersPerSecond = calculatedFPS;
 
@@ -249,6 +293,7 @@ function saveGame() {
         pepeFollowers: pepeFollowers,
         clickPower: clickPower,
         clickUpgradeCost: clickUpgradeCost,
+        clickUpgradeLevel: clickUpgradeLevel, // NEW: Saglabājam klikšķu līmeni
         mrBeastFollowers: mrBeastFollowers,
         skillPoints: skillPoints,
         rebirthsCount: rebirthsCount,
@@ -265,7 +310,8 @@ function loadGame() {
         pepeFollowers = save.pepeFollowers || 0;
         clickPower = save.clickPower || 1;
         clickUpgradeCost = save.clickUpgradeCost || 50;
-        mrBeastFollowers = save.mrBeastFollowers || 492000000; // ATJAUNINĀTS: Saglabā reālo bāzi ielādējot
+        clickUpgradeLevel = save.clickUpgradeLevel || 0; // NEW: Ielādējam klikšķu līmeni
+        mrBeastFollowers = save.mrBeastFollowers || 492000000;
         skillPoints = save.skillPoints || 0;
         rebirthsCount = save.rebirthsCount || 0;
         
